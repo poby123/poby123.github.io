@@ -1,0 +1,12 @@
+{
+  "name": "poby-blog",
+  "version": "1.0.0",
+  "private": false,
+  "scripts": {},
+  "dependencies": {
+    "ejs": "3.1.6"
+  },
+  "devDependencies": {
+    "live-server": "1.2.1"
+  }
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Otomanopee+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" type="text/css" href="/resources/index.css" />
+    <title>원주의 Memo</title>
+</head>
+
+<body>
+    <section class="content">
+        <div class="container">
+            <h2>
+                인프런 정리
+            </h2>
+            <article>
+    <div><span style="font-weight: bold; color: rgb(0, 0, 0);">Entity가 API 스펙에 영향을 줘서는 안된다.</span><br></div><div><span style="color: rgb(0, 0, 0);">&nbsp; * 문제</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; </span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;</span><span style="color: rgb(0, 0, 0);">* 1. Entity의 변수 이름을 바꾸거나 하면 API 스펙이 바뀌게 된다.</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; </span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;</span><span style="color: rgb(0, 0, 0);">* 2. 다양한 API가 있는데, 어떤 API는 어떤 필드가 NotEmpy이어야 하지만, 다른 필드는 아닐 수도 있다.</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; </span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;</span><span style="color: rgb(0, 0, 0);">* 3. Entity가 화면 계층에 의존적이 되면, 양방향으로 의존 관계가 생기므로, 유지 보수가 어려워진다.</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; </span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;* 4. 막을 수는 있지만 기본적으로 Entity의 모든 내용이 노출된다.&nbsp;</span><span style="color: rgb(0, 0, 0);"><br></span></div><div><span style="color: rgb(0, 0, 0);"><br></span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; * 해결 방법</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; </span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;*</span><span style="color: rgb(0, 0, 0);">&nbsp;</span><span style="color: rgb(0, 0, 0);">이를 위해 DTO(Data Transfer Object)를 도입한다.</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; </span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;</span><span style="color: rgb(0, 0, 0);">* DTO에 Validation 어노테이션을 적어주면 조금 더 명확해지는 장점이 있다.</span></div><div><div><span style="color: rgb(0, 0, 0);">&nbsp;&nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;</span><span style="color: rgb(0, 0, 0);">=&gt; <span style="text-decoration-line: underline;">Entity와 프레젠테이션 계층을 위한 로직을 분리해야 한다.</span></span></div></div><div><span style="color: rgb(0, 0, 0);">&nbsp;&nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp;</span><span style="color: rgb(0, 0, 0);">&nbsp;</span><span style="color: rgb(0, 0, 0);">=&gt; <span style="text-decoration-line: underline;">Entity를 밖에 노출하지 말아라.</span></span></div><div><span style="color: rgb(0, 0, 0);"><span style="text-decoration-line: underline;"><br></span></span></div>
+</article>
+        </div>
+    </section>
+
+    <script src="/resources/index.js"></script>
+</body>
+
+</html>

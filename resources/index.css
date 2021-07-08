@@ -1,0 +1,92 @@
+body {
+  margin: 0;
+  padding: 0;
+
+  overflow: auto;
+
+  scroll-snap-type: y mandatory; /* Chrome Canary */
+  scroll-snap-type: mandatory; /* Firefox */
+  -ms-scroll-snap-type: mandatory; /* IE/Edge */
+  -webkit-scroll-snap-type: mandatory; /* Safari */
+  -webkit-scroll-snap-destination: 0% 0%;
+  -webkit-overflow-scrolling: touch; /* important for iOS */
+}
+
+button {
+  border: none;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+ul{
+  list-style: none;
+}
+
+section {
+  flex-shrink: 0;
+  scroll-snap-align: start; /* latest (Chrome 69+) */
+  scroll-snap-coordinate: 0% 0%; /* older (Firefox/IE) */
+  -webkit-scroll-snap-coordinate: 0% 0%; /* older (Safari) */
+}
+
+.index {
+  border: 1px solid red;
+  height: 100vh;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url('/resources/memo2.jpg');
+  background-position: center;
+  background-size: cover;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.index .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  max-width: 1000px;
+  min-height: 450px;
+
+  /* border: 1px solid blue; */
+
+  color: white;
+  font-family: 'Otomanopee One';
+  font-size: 4vw;
+  margin-left: 0.1em;
+  letter-spacing: 0.1em;
+
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content {
+  border: 1px solid red;
+  height: 100vh;
+
+  font-family: 'Otomanopee One';
+}
+
+.content .container{
+  /* display: flex; */
+
+  max-width: 1000px;
+  min-height: 450px;
+
+  /* border: 1px solid blue; */
+
+  font-family: 'Otomanopee One';
+
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+#title-header:hover {
+  cursor: pointer;
+}

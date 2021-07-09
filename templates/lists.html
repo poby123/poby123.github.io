@@ -1,7 +1,17 @@
 <ul>
-    <% lists.map(list => { %>
-        <li>
-            <a href="/deploy/<%=list%>"><%=list%></a>
-        </li>
+    <% lists.map(list => { 
+        // 디렉토리
+        if(list.num !== undefined){%>
+            <li>
+                <a href="<%=list.link%>"><%=list.name%>(<%=list.num%>)</a>
+            </li>
+        <%}
+
+        // 파일
+        else{%>
+            <li>
+                <a href="<%=list.link%>"><%=list.name%>(<%=list.modifiedTime%>)</a>
+            </li>
+        <%}%>
     <% })%>
 </ul>

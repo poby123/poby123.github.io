@@ -1,15 +1,6 @@
 body {
   margin: 0;
   padding: 0;
-
-  overflow: auto;
-
-  scroll-snap-type: y mandatory; /* Chrome Canary */
-  scroll-snap-type: mandatory; /* Firefox */
-  -ms-scroll-snap-type: mandatory; /* IE/Edge */
-  -webkit-scroll-snap-type: mandatory; /* Safari */
-  -webkit-scroll-snap-destination: 0% 0%;
-  -webkit-overflow-scrolling: touch; /* important for iOS */
 }
 
 button {
@@ -20,19 +11,15 @@ button:hover {
   cursor: pointer;
 }
 
-ul{
-  list-style: none;
+ul {
 }
 
-section {
-  flex-shrink: 0;
-  scroll-snap-align: start; /* latest (Chrome 69+) */
-  scroll-snap-coordinate: 0% 0%; /* older (Firefox/IE) */
-  -webkit-scroll-snap-coordinate: 0% 0%; /* older (Safari) */
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 .index {
-  border: 1px solid red;
   height: 100vh;
   background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
     url('/resources/memo2.jpg');
@@ -53,8 +40,6 @@ section {
   max-width: 1000px;
   min-height: 450px;
 
-  /* border: 1px solid blue; */
-
   color: white;
   font-family: 'Otomanopee One';
   font-size: 4vw;
@@ -66,19 +51,23 @@ section {
 }
 
 .content {
-  border: 1px solid red;
   height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   font-family: 'Otomanopee One';
 }
 
-.content .container{
-  /* display: flex; */
-
+.content .container {
+  width: 90vw;
+  height: 100%;
   max-width: 1000px;
   min-height: 450px;
 
-  /* border: 1px solid blue; */
+  /* border: 1px solid red; */
+  margin-left: auto;
+  margin-right: auto;
 
   font-family: 'Otomanopee One';
 
@@ -86,7 +75,16 @@ section {
   margin-right: auto;
 }
 
+.content .container article {
+  font-family: 'Nanum Gothic Coding';
+  font-size: 16px;
+  line-height: 1.7em;
+  overflow-x: scroll;
+}
 
 #title-header:hover {
   cursor: pointer;
+}
+
+@media (max-width: 768px) {
 }

@@ -2,7 +2,12 @@
   "name": "poby-blog",
   "version": "1.0.0",
   "private": false,
-  "scripts": {},
+  "scripts": {
+    "start": "npx live-server",
+    "git-add" : "git add *",
+    "git-commit" : "git commit -m",
+    "deploy" : "git add * && git commit -m "
+  },
   "dependencies": {
     "ejs": "3.1.6"
   },

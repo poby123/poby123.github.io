@@ -4,7 +4,9 @@
   "private": false,
   "scripts": {
     "start": "npx live-server",
-    "deploy": "git add * && git commit -m"
+    "drop": "rmdir /s deploy",
+    "create": "node main.js",
+    "deploy": "npm run drop && npm run create"
   },
   "dependencies": {
     "ejs": "3.1.6"

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko" data-lang="ko" data-title-en="The failures that never raise an error — Wonju Lee">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에러를 내지 않는 실패 — 이원주</title>
+<meta name="description" content="되돌리기가 답이 아닌 시스템을 확인하는 방법. 단위 시험이 닿지 못하는 구간, 이벤트 루프 지연 기준의 부하 시험, 조용히 실패하던 배포 안전장치.">
+<meta property="og:title" content="에러를 내지 않는 실패 — 이원주">
+<meta property="og:description" content="단위 시험이 닿지 못하는 구간, 이벤트 루프 지연 기준의 부하 시험, 조용히 실패하던 배포 안전장치 셋.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('wonju.lang')||'ko';document.documentElement.dataset.lang=l;document.documentElement.lang=l;}catch(e){}document.documentElement.className='anim';</script>
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><span data-ko>이원주 <i>· 소프트웨어 엔지니어</i></span><span data-en>Wonju Lee <i>· Software Engineer</i></span></a>
+    <nav>
+      <a href="/#cases" class="hide-sm"><span data-ko>케이스 스터디</span><span data-en>Case studies</span></a>
+      <a href="/#contact"><span data-ko>연락</span><span data-en>Contact</span></a>
+      <span class="langswitch">
+        <button type="button" data-set-lang="ko" aria-pressed="true">KO</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<div class="case-hero">
+  <p class="kicker"><a href="/">←</a> &nbsp;<span data-ko>케이스 스터디 · 검증과 배포</span><span data-en>Case study · Testing and deployment</span></p>
+  <h1><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></h1>
+  <p class="lead"><span data-ko>배포는 성공으로 끝났고, 시험은 통과로 읽혔고, 조회는 0을 돌려줬습니다. <strong>셋 다 틀렸는데 아무것도 에러를 내지 않았습니다.</strong></span><span data-en>The deploy exited successfully, the test read as a pass, the query returned zero. <strong>All three were wrong, and none of them raised an error.</strong></span></p>
+  <dl class="specsheet">
+    <div><dt><span data-ko>기간</span><span data-en>Period</span></dt><dd>2026.08 – <span data-ko>현재</span><span data-en>present</span></dd></div>
+    <div><dt><span data-ko>역할</span><span data-en>Role</span></dt><dd><span data-ko>시험 설계 · 배포 절차 · 원인 분석</span><span data-en>Test design, release process, root-cause analysis</span></dd></div>
+    <div><dt><span data-ko>스택</span><span data-en>Stack</span></dt><dd><span class="mono">SIPp · Node.js · MySQL · Asterisk ARI · OpenAI Realtime · bash</span></dd></div>
+    <div><dt><span data-ko>대상</span><span data-en>Subject</span></dt><dd><span data-ko>제로콜 전화 시스템</span><span data-en>The ZeroCall telephony stack</span></dd></div>
+  </dl>
+
+  <div class="context">
+    <h2><span data-ko>배경</span><span data-en>Background</span></h2>
+    <p><span data-ko>제로콜의 전화는 학원의 대표번호로 걸려 옵니다. 배포가 잘못되면 그 번호가 안 받아지고, <strong>되돌리는 동안에도 고객 전화는 계속 걸려 옵니다.</strong></span><span data-en>ZeroCall carries an academy’s main line. A bad release means that number stops answering — and <strong>customers keep calling while you roll back.</strong></span></p>
+    <p><span data-ko>고쳐 보고 아니면 되돌리는 방식이 통하지 않는 시스템에서, 무엇을 어떻게 확인해 왔는지에 대한 기록입니다.</span><span data-en>This is a record of what I verify, and how, in a system where "try it and roll back" is not available.</span></p>
+  </div>
+  <div class="summary">
+    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
+    <ul>
+      <li><span data-ko>발신번호를 고르는 로직이 <strong>서버 코드에 없어서</strong>, 시험이 원본 파일에서 쿼리를 꺼내 실제 DB에 돌립니다.</span><span data-en>The caller-ID logic <strong>is not in the server code</strong>, so the test lifts the query from its source file and runs it against the real database.</span></li>
+      <li><span data-ko>부하 시험의 판정 기준은 CPU가 아니라 <strong>이벤트 루프 지연</strong>입니다. CPU가 여유 있는데 음질이 먼저 무너집니다.</span><span data-en>Load testing is judged on <strong>event-loop lag</strong>, not CPU — audio degrades while CPU still looks fine.</span></li>
+      <li><span data-ko>AI 응대는 <strong>마이크로 직접 말을 걸어</strong> 어떤 도구를 호출했는지 봅니다.</span><span data-en>The voice agent is tested <strong>by speaking to it</strong> and watching which tools it calls.</span></li>
+      <li><span data-ko>배포 안전장치가 <strong>세 가지 방식으로 조용히 실패</strong>하고 있었습니다. 가장 심각했던 것은 조회 실패를 "통화 없음"으로 읽던 것입니다.</span><span data-en>The release guard was <strong>failing silently in three ways</strong> — worst of all, reading a failed query as "no calls".</span></li>
+    </ul>
+  </div>
+</div>
+
+<nav class="toc">
+  <ol>
+    <li><a href="#verify"><span data-ko>단위 시험이 닿지 못하는 곳</span><span data-en>Where unit tests cannot reach</span></a></li>
+    <li><a href="#forensics"><span data-ko>배포 안전장치가 작동하지 않고 있었다</span><span data-en>The release guard was not actually guarding</span></a></li>
+    <li><a href="#lesson"><span data-ko>조용한 실패에 대하여</span><span data-en>On silent failure</span></a></li>
+  </ol>
+</nav>
+
+<section class="block" id="verify">
+  <h2><span data-ko>단위 시험이 닿지 못하는 곳</span><span data-en>Where unit tests cannot reach</span></h2>
+  <p><span data-ko>단위 시험이 닿지 못하는 구간이 있습니다. 살아 있는 DB·API·교환기가 있어야만 확인되는 것들입니다. 그런 구간을 위해 시험 층을 따로 만들었습니다.</span><span data-en>Some things unit tests can never reach — they only show up against a live database, API and exchange. Those got their own test layers.</span></p>
+
+  <h3><span data-ko>① 시나리오 시험</span><span data-en>① Scenario tests</span></h3>
+  <p><span data-ko><strong>발신번호를 고르는 판단이 서버 코드에 없습니다.</strong> 다이얼플랜 설정의 SQL이 유일한 구현이라 단위 시험이 닿지 못합니다. 그래서 시험 스크립트가 그 파일에서 쿼리를 그대로 꺼내 실제 DB에 돌립니다 — 손으로 옮겨 적으면 원본과 갈라져 시험이 거짓말을 합니다.</span><span data-en><strong>The logic choosing a caller ID is not in the server code.</strong> Its only implementation is SQL inside the dialplan, which unit tests never see. So the script lifts the query out of that file and runs it against the real database — transcribe it and the test starts lying.</span></p>
+  <p><span data-ko>고객사 사이의 권한 경계가 지켜지는지, 모든 노드가 같은 다이얼플랜을 들고 있는지도 함께 봅니다. 시험은 <strong>자기가 바꾼 값을 되돌립니다.</strong></span><span data-en>It also checks that tenant boundaries hold, and that every node carries the same dialplan. Each test <strong>puts back what it changed.</strong></span></p>
+
+  <h3><span data-ko>② 부하 시험 — CPU를 보지 않는다</span><span data-en>② Load testing — CPU is the wrong gauge</span></h3>
+  <p><span data-ko>통화 한 건마다 UDP 소켓 하나와 20ms 주기 루프 두 개가 열립니다. <strong>초당 100회 타이머와 100패킷</strong>이 전부 단일 이벤트 루프 위에서 돕니다. 루프가 밀리면 RTP 간격이 흔들려 <strong>CPU가 여유 있는데 음질이 먼저 무너집니다.</strong></span><span data-en>Each call opens a UDP socket and two 20 ms loops — <strong>100 timers and 100 packets a second</strong>, all on one event loop. When it slips, RTP jitters and <strong>audio degrades while CPU still looks fine.</strong></span></p>
+  <p><span data-ko>그래서 판정 기준은 <strong>이벤트 루프 지연 p99 20ms</strong>입니다. 그 지점이 인스턴스당 정원이고, <span class="mono">올림(회선 한도 ÷ 정원)</span>이 필요한 대수입니다.</span><span data-en>So the gauge is <strong>event-loop lag p99 at 20 ms.</strong> That point is one instance’s capacity, and <span class="mono">ceil(line limit / capacity)</span> is how many you need.</span></p>
+  <p><span data-ko>25 → 50 → 100 → 200으로 올리며 각 단계를 10분 이상 유지합니다. 한 번에 최대치를 때리면 어디서 무너졌는지 못 봅니다.</span><span data-en>Ramp 25 → 50 → 100 → 200, ten minutes per step — hit the top at once and you cannot see where it broke.</span></p>
+
+  <h3><span data-ko>③ AI 응대는 말을 걸어서 확인한다</span><span data-en>③ The AI agent is tested by talking to it</span></h3>
+  <p><span data-ko>응답 문자열을 비교해서는 검증되지 않습니다. 마이크로 직접 말을 걸면서 <strong>에이전트가 어떤 도구를 어떤 인자로 호출했는지</strong>와 전문 저장 여부를 함께 보는 디버거를 만들었습니다. 통화를 걸지 않고도 응대 흐름을 끝까지 밟습니다.</span><span data-en>You cannot verify a voice agent by diffing strings. I built a debugger that lets me speak to it while showing <strong>which tools it called and with what arguments</strong>, and whether the transcript was stored — the whole flow, without placing a call.</span></p>
+  <blockquote><p><span data-ko>시험 문서에 <strong>"함정" 목록</strong>을 둡니다. 두 API가 같은 토큰 클레임을 반대로 해석해 모든 요청이 401인데 "거부됐으니 통과"로 읽은 일, 순차 분배가 자리마다 15초를 소요한다는 점을 모르고 20초에 보고 판정한 일. <strong>시험이 틀리는 방식은 대개 실패를 성공으로 읽는 쪽입니다.</strong></span><span data-en>The docs carry a <strong>list of traps</strong>: two APIs reading the same token claim in opposite directions, so everything 401’d and I read "rejected, therefore passed"; judging at twenty seconds when sequential distribution spends fifteen per seat. <strong>Tests usually fail by reading a failure as a pass.</strong></span></p></blockquote>
+</section>
+
+<section class="block" id="forensics">
+  <h2><span data-ko>배포 안전장치가 작동하지 않고 있었다</span><span data-en>The release guard was not actually guarding</span></h2>
+  <p><span data-ko>통화를 처리하는 프로세스를 교체할 때는 통화가 빠질 때까지 기다리도록 되어 있습니다. 그 대기 로직을 점검하다가 결함 세 가지를 발견했습니다. <strong>셋 다 에러 없이 통과하고 있어, 로그만 보아서는 드러나지 않았습니다.</strong></span><span data-en>Replacing the process that handles calls is supposed to wait for them to drain. Auditing that logic, I found three faults. <strong>All three passed without raising anything, so the logs never showed them.</strong></span></p>
+
+  <h3><span data-ko>① 주석은 "중단한다"였고 코드는 그대로 통과했다</span><span data-en>① The comment said "abort"; the code walked on</span></h3>
+  <p><span data-ko>대기 시간이 상한을 넘기면 중단하도록 되어 있었습니다. 실제로는 <strong>경고만 찍고 통과</strong>했습니다. 스크립트의 마지막 명령이 로그 출력이라, 그 단계가 <strong>성공으로 끝나 버린 것</strong>입니다.</span><span data-en>It was supposed to abort when the wait exceeded its limit. In practice it <strong>logged a warning and continued</strong> — the last command in the step was the log line itself, so <strong>the step exited successfully.</strong></span></p>
+
+  <h3><span data-ko>② 절대 오지 않는 순간을 기다리고 있었다</span><span data-en>② It waited for a moment that never came</span></h3>
+  <p><span data-ko>"통화가 하나도 없을 때"를 기다렸습니다. 바쁜 시간대에는 그런 순간이 오지 않아서, <strong>늘 상한을 꽉 채우고 타임아웃 경로로만</strong> 갔습니다.</span><span data-en>It waited for "no calls at all". During busy hours that moment never arrives, so it <strong>always burned the full timeout and took the timeout path.</strong></span></p>
+  <p><span data-ko>그래서 기준을 <strong>"무엇이 실제로 깨지는가"</strong>로 좁혔습니다. 상담원과 연결된 통화와 대기 중인 통화는 교체해도 다음 인스턴스가 이어받습니다. <strong>ARS와 AI 응대만</strong> 미디어가 이 프로세스를 지나므로 그 자리에서 깨집니다. 그 통화만 확인하면 됩니다.</span><span data-en>So the test became <strong>"what actually breaks?"</strong> Calls connected to an agent and calls waiting in queue are picked up by the next instance. <strong>Only IVR and AI calls</strong> route media through this process, so only those break — and only those need checking.</span></p>
+
+  <h3><span data-ko>③ 조회 실패를 "통화 없음"으로 읽고 있었다</span><span data-en>③ A failed query read as "no calls"</span></h3>
+  <p><span data-ko>가장 나쁜 것이었습니다. 교환기에 통화 수를 묻는데, <strong>응답이 없으면 그 값이 0으로 떨어졌습니다.</strong> 그러면 "통화가 없다"가 되어 교체가 진행됩니다.</span><span data-en>This was the worst one. It asked the PBX how many calls were live, and <strong>a failed query came back as zero.</strong> Zero means "no calls", so the replacement proceeded.</span></p>
+  <blockquote><p><span data-ko>즉 <strong>교환기가 이상할 때 가장 확신을 갖고 교체</strong>하고 있었습니다. 안전장치가 정확히 위험한 순간에 반대로 작동한 것입니다. 지금은 살아 있는지 먼저 확인하고, 계속 대답이 없으면 중단합니다.</span><span data-en>In other words, it replaced <strong>most confidently exactly when the PBX was unhealthy.</strong> The safety check inverted itself at the one moment it mattered. Now it verifies the PBX is answering at all, and aborts if it stays silent.</span></p></blockquote>
+  <p><span data-ko>고친 뒤에는 교환기 스텁을 만들어 <strong>다섯 경로를 전부 돌렸습니다</strong> — 조용해짐 · 계속 바쁨 · 위험한 통화 잔존 · 도중에 사라짐 · 교환기 무응답. 배포 스크립트는 평소에 안 도는 경로가 많아서, 그 경로를 일부러 만들어 보지 않으면 다음에 또 같은 식으로 조용히 틀립니다.</span><span data-en>Afterwards I stubbed the PBX and <strong>exercised all five paths</strong> — goes quiet, stays busy, risky calls remain, calls vanish mid-wait, PBX unresponsive. Deploy scripts are mostly branches that never run in normal times; unless you force them, they go on failing silently.</span></p>
+</section>
+
+<section class="block" id="lesson">
+  <h2><span data-ko>조용한 실패에 대하여</span><span data-en>On silent failure</span></h2>
+  <p><span data-ko>여기 모인 결함에는 공통점이 있습니다. <strong>하나도 에러를 내지 않았습니다.</strong> 배포는 성공으로 끝났고, 시험은 통과로 읽혔고, 조회는 0을 돌려줬습니다.</span><span data-en>Every fault here has one thing in common: <strong>none of them raised an error.</strong> The deploy exited successfully, the test read as a pass, the query returned zero.</span></p>
+  <p><span data-ko>그래서 시험 문서에 <strong>"함정" 목록</strong>을 따로 둡니다. 두 API가 같은 토큰 클레임을 반대로 해석해 모든 요청이 거부됐는데 <strong>"거부됐으니 통과"로 읽은 일</strong>, 순차 분배가 자리마다 15초를 소요한다는 점을 모르고 20초에 보고 판정한 일 — 전부 실제로 당한 것들입니다.</span><span data-en>So the test docs carry a <strong>list of traps</strong>: two APIs reading the same token claim in opposite directions so everything was rejected and I <strong>read "rejected, therefore passed"</strong>; judging at twenty seconds when sequential distribution spends fifteen per seat. All of them caught me first.</span></p>
+  <blockquote><p><span data-ko><strong>시험이 틀리는 방식은 대개 실패를 성공으로 읽는 쪽입니다.</strong> 그래서 "무엇을 확인했는가"보다 <strong>"어떤 상태를 만들어서 확인했는가"</strong>를 적어 둡니다. 조건이 다르면 같은 이름의 시험이 다른 것을 봅니다.</span><span data-en><strong>Tests usually fail by reading a failure as a pass.</strong> So the docs record <strong>what state was constructed</strong> rather than what was checked — under different conditions, a test with the same name looks at something else entirely.</span></p></blockquote>
+</section>
+
+<div class="casenav">
+  <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
+  <a href="/cases/infra.html"><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></a>
+  <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
+  <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+</div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-ko>이원주 · 소프트웨어 엔지니어</span><span data-en>Wonju Lee · Software Engineer</span>
+    <span class="mono">2026</span>
+  </div>
+</footer>
+
+</body>
+</html>

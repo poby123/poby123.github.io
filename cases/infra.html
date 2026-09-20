@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko" data-lang="ko" data-title-en="Why k3s instead of EKS — Wonju Lee">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EKS 대신 k3s를 고른 이유 — 이원주</title>
+<meta name="description" content="서비스가 늘면서 EC2에 흩어진 애플리케이션 51개를 k3s + Argo CD로 옮긴 과정. 배포를 수동으로 둔 이유, 라운드로빈 DNS 장애, 알려진 제약.">
+<meta property="og:title" content="EKS 대신 k3s를 고른 이유 — 이원주">
+<meta property="og:description" content="서비스가 늘면서 EC2에 흩어진 애플리케이션 51개를 k3s + Argo CD로 옮긴 과정. 배포를 수동으로 둔 이유, 라운드로빈 DNS 장애, 알려진 제약.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('wonju.lang')||'ko';document.documentElement.dataset.lang=l;document.documentElement.lang=l;}catch(e){}document.documentElement.className='anim';</script>
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><span data-ko>이원주 <i>· 소프트웨어 엔지니어</i></span><span data-en>Wonju Lee <i>· Software Engineer</i></span></a>
+    <nav>
+      <a href="/#cases" class="hide-sm"><span data-ko>케이스 스터디</span><span data-en>Case studies</span></a>
+      <a href="/#contact"><span data-ko>연락</span><span data-en>Contact</span></a>
+      <span class="langswitch">
+        <button type="button" data-set-lang="ko" aria-pressed="true">KO</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<div class="case-hero">
+  <p class="kicker"><a href="/">←</a> &nbsp;<span data-ko>케이스 스터디 · 플로버 플랫폼 인프라</span><span data-en>Case study · Flover platform infrastructure</span></p>
+  <h1><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></h1>
+  <p class="lead"><span data-ko>서버비와 조직 규모를 재고 <strong>EKS 대신 k3s</strong>를 골랐습니다. 애플리케이션 51개를 GitOps로 옮겼습니다.</span><span data-en>Weighing cost against the size of the team, I chose <strong>k3s over EKS</strong> and moved 51 applications onto GitOps.</span></p>
+  <dl class="specsheet">
+    <div><dt><span data-ko>기간</span><span data-en>Period</span></dt><dd>2026.07 – <span data-ko>현재</span><span data-en>present</span></dd></div>
+    <div><dt><span data-ko>역할</span><span data-en>Role</span></dt><dd><span data-ko>설계 · 구축 · 운영</span><span data-en>Design, build, operation</span></dd></div>
+    <div><dt><span data-ko>스택</span><span data-en>Stack</span></dt><dd><span class="mono">k3s · Argo CD · Terraform · Traefik · cert-manager · SealedSecrets · AWS NLB</span></dd></div>
+    <div><dt><span data-ko>규모</span><span data-en>Scale</span></dt><dd><span data-ko>노드 5대 · 애플리케이션 51개</span><span data-en>5 nodes · 51 applications</span></dd></div>
+  </dl>
+
+  <div class="context">
+    <h2><span data-ko>배경</span><span data-en>Background</span></h2>
+    <p><span data-ko>플로버에는 서비스가 하나였습니다. 공간히어로를 EC2에 올리고 스크립트로 배포하면 충분했습니다.</span><span data-en>Flover had one service. Putting Gonggan Hero on EC2 and deploying with scripts was enough.</span></p>
+    <p><span data-ko>제로콜이 붙고 그 아래로 메시징·결제 서비스가 늘면서 상황이 달라졌습니다. <strong>인프라를 전담하는 사람은 따로 없었습니다.</strong></span><span data-en>Then ZeroCall arrived, with messaging and billing services under it. <strong>There was no one whose job was infrastructure.</strong></span></p>
+  </div>
+  <div class="summary">
+    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
+    <ul>
+      <li><span data-ko>매니페스트가 <strong>공간히어로 저장소 안에 제로콜 것까지</strong> 들어 있었습니다. 서비스마다 배포 방식도 달랐습니다.</span><span data-en>ZeroCall’s manifests were living <strong>inside the Gonggan Hero repository</strong>, and every service deployed differently.</span></li>
+      <li><span data-ko>서버비와 조직 규모를 재고 <strong>EKS 대신 k3s</strong>를 골랐습니다. 컨트롤 플레인 값을 매달 지불하는 것은 그 규모에서 얻는 것이 적었습니다.</span><span data-en>Weighing cost against team size, I chose <strong>k3s over EKS</strong> — a monthly control-plane bill buys little at that size.</span></li>
+      <li><span data-ko><strong>배포는 의도적으로 수동</strong>입니다. CI는 태그만 커밋하고, 누를 시점은 사람이 정합니다.</span><span data-en><strong>Deployment is manual on purpose</strong> — CI commits a tag, a person decides when it ships.</span></li>
+      <li><span data-ko>고치지 못한 것은 <strong>근거와 함께 적어 둡니다.</strong> 숨기면 다음 사람이 같은 함정을 밟습니다.</span><span data-en>What is still wrong is <strong>written down with its reasoning</strong> — hidden, it becomes a trap for the next person.</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<section class="block">
+  <h2><span data-ko>서비스가 하나일 때는 문제가 아니었다</span><span data-en>It was not a problem while there was one service</span></h2>
+  <p><span data-ko>공간히어로만 있을 때는 EC2에 앱을 올리고 스크립트로 배포하면 충분했습니다. 그런데 제로콜이 붙고, 그 아래로 메시징·결제 서비스가 늘어나면서 상황이 달라졌습니다.</span><span data-en>With only Gonggan Hero, putting apps on EC2 and deploying with scripts was enough. Then ZeroCall arrived, and messaging and billing services under it.</span></p>
+  <p><span data-ko>무엇이 어디에 떠 있는지 한 번에 볼 수 없고, 서비스마다 배포 방식이 다르고, <strong>매니페스트가 공간히어로 저장소 안에 제로콜 것까지 들어 있는</strong> 이상한 구조가 되었습니다.</span><span data-en>Nobody could see at a glance what was running where, each service deployed slightly differently, and <strong>ZeroCall’s manifests were living inside the Gonggan Hero repository.</strong></span></p>
+
+  <h3><span data-ko>EKS가 아니라 k3s</span><span data-en>k3s, not EKS</span></h3>
+  <p><span data-ko>관리형 쿠버네티스는 편하지만 컨트롤 플레인 요금이 고정으로 붙습니다. 우리는 노드 몇 대로 시작하는 규모였고, 인프라를 전담하는 사람이 따로 있지도 않았습니다. 그 조건에서 컨트롤 플레인 값을 매달 내는 것은 비용 대비 얻는 것이 적다고 판단했습니다.</span><span data-en>Managed Kubernetes is comfortable, but the control plane is a fixed monthly bill. We were starting at a handful of nodes, with no dedicated infrastructure person. Paying for a control plane at that size buys less than it costs.</span></p>
+  <p><span data-ko>k3s는 컨트롤 플레인이 노드 위에 얹히므로 그 비용이 없습니다. 대신 컨트롤 플레인의 건강을 우리가 책임져야 하고, etcd 멤버 수 같은 것을 직접 알아야 합니다. 트레이드오프를 알고 고른 것이고, 그 근거를 저장소에 적어 두었습니다 — 나중에 누가 보든 "왜 EKS가 아닌가"에 답이 있어야 하기 때문입니다.</span><span data-en>In k3s the control plane rides on the nodes, so that cost disappears — in exchange for owning its health and knowing things like how many etcd members you should have. It was a trade-off chosen deliberately, and written down in the repository, so that whoever reads it later finds an answer to "why not EKS".</span></p>
+</section>
+
+<section class="block">
+  <h2><span data-ko>클러스터 구성</span><span data-en>The cluster</span></h2>
+  <figure class="diagram">
+    <svg viewBox="0 0 900 250" role="img" aria-label="NLB in front of four k3s nodes plus a dedicated carrier node, with Argo CD pulling from git">
+      <defs>
+        <marker id="k1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="var(--path)"/>
+        </marker>
+      </defs>
+      <text class="d-s" x="24" y="30"><tspan data-ko>사용자</tspan><tspan data-en>users</tspan></text>
+      <path class="d-line" d="M24,42 V64 H150" marker-end="url(#k1)"/>
+
+      <rect class="d-box" x="152" y="46" width="160" height="38" rx="3"/>
+      <text class="d-t" x="232" y="63" text-anchor="middle">NLB</text>
+      <text class="d-s" x="232" y="78" text-anchor="middle"><tspan data-ko>L4 패스스루 · 헬스체크</tspan><tspan data-en>L4 passthrough · health checks</tspan></text>
+
+      <path class="d-line" d="M312,65 H388" marker-end="url(#k1)"/>
+
+      <rect class="d-box2" x="390" y="28" width="330" height="74" rx="4"/>
+      <text class="d-s" x="555" y="22" text-anchor="middle">Traefik DaemonSet · 80/443</text>
+      <text class="d-t" x="555" y="58" text-anchor="middle"><tspan data-ko>TLS 종단 · 호스트 라우팅</tspan><tspan data-en>TLS termination · host routing</tspan></text>
+      <text class="d-s" x="555" y="78" text-anchor="middle">cert-manager</text>
+
+      <path class="d-line" d="M555,102 V126"/>
+      <path class="d-line" d="M150,126 H830"/>
+      <path class="d-line" d="M150,126 V150" marker-end="url(#k1)"/>
+      <path class="d-line" d="M330,126 V150" marker-end="url(#k1)"/>
+      <path class="d-line" d="M510,126 V150" marker-end="url(#k1)"/>
+      <path class="d-line" d="M690,126 V150" marker-end="url(#k1)"/>
+      <path class="d-line" d="M830,126 V150" marker-end="url(#k1)"/>
+
+      <rect class="d-box" x="86" y="152" width="128" height="52" rx="3"/>
+      <text class="d-t" x="150" y="172" text-anchor="middle">server 1</text>
+      <text class="d-s" x="150" y="189" text-anchor="middle">etcd</text>
+      <rect class="d-box" x="266" y="152" width="128" height="52" rx="3"/>
+      <text class="d-t" x="330" y="172" text-anchor="middle">server 2</text>
+      <text class="d-s" x="330" y="189" text-anchor="middle">etcd</text>
+      <rect class="d-box" x="446" y="152" width="128" height="52" rx="3"/>
+      <text class="d-t" x="510" y="172" text-anchor="middle">server 3</text>
+      <text class="d-s" x="510" y="189" text-anchor="middle">etcd</text>
+      <rect class="d-box" x="626" y="152" width="128" height="52" rx="3"/>
+      <text class="d-t" x="690" y="172" text-anchor="middle">agent</text>
+      <text class="d-s" x="690" y="189" text-anchor="middle"><tspan data-ko>워크로드 전용</tspan><tspan data-en>workloads only</tspan></text>
+      <rect class="d-box" x="772" y="152" width="116" height="52" rx="3"/>
+      <text class="d-t" x="830" y="172" text-anchor="middle">KCT</text>
+      <text class="d-s" x="830" y="189" text-anchor="middle">taint</text>
+      <text class="d-s" x="830" y="222" text-anchor="middle"><tspan data-ko>화이트리스트 IP</tspan><tspan data-en>whitelisted IP</tspan></text>
+    </svg>
+    <figcaption><span data-ko>server 3대(컨트롤 플레인 + etcd + 워크로드), 워크로드 전용 agent 1대, 그리고 통신사 화이트리스트에 묶인 전용 노드 1대. 앞단은 NLB가 L4로 흘리고 TLS는 클러스터 안의 Traefik이 끝냅니다.</span><span data-en>Three servers (control plane, etcd and workloads), one agent for workloads only, and one dedicated node holding the carrier-whitelisted address. An NLB passes traffic through at L4; TLS terminates at Traefik inside the cluster.</span></figcaption>
+  </figure>
+  <p><span data-ko>용량이 필요하면 server가 아니라 agent를 늘립니다. server 수는 곧 etcd 멤버 수이고, etcd는 Raft라 3 다음은 5입니다 — 4는 3과 똑같이 한 대만 버티면서 쓰기만 느려집니다. 이런 것들은 한 번 잘못 늘리면 되돌리기가 번거로워서 저장소에 명시해 두었습니다.</span><span data-en>When capacity is needed we add agents, not servers. The server count is the etcd member count, and etcd is Raft: after three comes five — four tolerates exactly as many failures as three while making writes slower. Mistakes like that are awkward to undo, so the rule is written into the repository.</span></p>
+</section>
+
+<section class="block">
+  <h2><span data-ko>노드 한 대가 흔들리면 사용자 25%가 실패하던 구조</span><span data-en>The setup where one shaky node failed a quarter of users</span></h2>
+  <p><span data-ko>처음에는 도메인 A레코드에 노드 EIP 네 개를 나열한 라운드로빈 DNS였습니다. 싸고 간단했지만 DNS에는 헬스체크가 없습니다. 2026년 8월 말, 노드 한 대가 흔들리자 그 IP를 고른 사용자 25%가 그대로 실패했습니다.</span><span data-en>It began as round-robin DNS: four node EIPs listed on the domain’s A record. Cheap and simple, but DNS has no health check. At the end of August 2026 one node wobbled, and the quarter of users whose resolver picked that IP simply failed.</span></p>
+  <p><span data-ko>앞단에 NLB를 세웠습니다. L4 패스스루라 TLS를 건드리지 않으므로, cert-manager가 발급한 인증서를 Traefik이 그대로 제시합니다. 인증서 관리 위치를 바꾸지 않고 헬스체크만 얻었습니다.</span><span data-en>An NLB now sits in front. Because it passes through at L4 it never touches TLS, so Traefik still presents the certificate cert-manager issued. We gained health checking without moving certificate ownership anywhere.</span></p>
+</section>
+
+<section class="block">
+  <h2><span data-ko>배포는 자동이 아니라 의도적으로 수동입니다</span><span data-en>Deployment is manual on purpose</span></h2>
+  <p><span data-ko>CI는 이미지를 굽고 <strong>태그만 커밋</strong>합니다. Argo CD는 그 차이를 "동기화되지 않음"으로 표시한 채 기다립니다. 사람이 누르면 반영됩니다. 이미지는 항상 최신이고, 배포 시점은 사람이 정한다는 뜻입니다.</span><span data-en>CI builds the image and <strong>commits only the tag</strong>. Argo CD marks the drift as out of sync and waits. A person presses sync. The image is always current; when it ships is a human decision.</span></p>
+  <p><span data-ko>예외는 랜딩 페이지 세 개입니다. 정적 마케팅 페이지라 롤백이 싸고 배포가 잦아서 자동으로 두었습니다. 다만 Argo의 기본 폴링 주기가 3분이라 "즉시"가 아니라 최대 3분 지연이라는 점도 적어 두었습니다 — 이런 사항을 기록해 두지 않으면 나중에 누군가 "배포가 안 된다"고 30분을 씁니다.</span><span data-en>The exception is three landing pages: static marketing sites where rollback is cheap and releases are frequent, so they sync automatically. The note also says that Argo polls every three minutes, so "automatic" means up to three minutes late — without that line, someone eventually spends half an hour deciding the deploy is broken.</span></p>
+  <ul class="bullets">
+    <li><span data-ko><strong>GitHub Actions는 클러스터 API에 접근하지 않습니다.</strong> 클러스터가 git을 당겨옵니다. 그래서 6443 포트를 외부에 열 필요가 없고, 나중에 온프레미스로 옮겨도 그대로 동작합니다.</span><span data-en><strong>GitHub Actions never reaches the cluster API.</strong> The cluster pulls from git instead, so port 6443 is never exposed — and the same setup keeps working if this moves on-premise.</span></li>
+    <li><span data-ko><strong>이미지 태그는 커밋 SHA로 고정</strong>합니다. <span class="mono">latest</span> 같은 가변 태그를 쓰면 Argo가 변경을 감지하지 못하고, 지금 무엇이 떠 있는지도 알 수 없습니다.</span><span data-en><strong>Tags are pinned to commit SHAs.</strong> A moving tag like <span class="mono">latest</span> hides changes from Argo and makes it impossible to say what is actually running.</span></li>
+    <li><span data-ko><strong>Argo Application은 인프라 저장소에, 매니페스트는 각 서비스 저장소에</strong> 둡니다. Application은 포인터일 뿐이고, 태그를 커밋하는 주체가 각 서비스 CI이기 때문입니다. 한곳에 모으면 모든 CI가 인프라 저장소 권한을 들고 서로 부딪칩니다.</span><span data-en><strong>Argo Applications live in the infrastructure repository; manifests live with their service.</strong> An Application is just a pointer, and it is each service’s CI that commits the tag. Centralising manifests would hand every CI write access here and make them collide.</span></li>
+    <li><span data-ko><strong>비밀값은 SealedSecret으로 저장소에 들어갑니다.</strong> 클러스터 안에서만 풀 수 있으므로 git에 올려 두고 관리할 수 있습니다.</span><span data-en><strong>Secrets are committed as SealedSecrets</strong> — only the cluster can open them, so they can live in git like everything else.</span></li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span data-ko>모르는 채로 두지 않기</span><span data-en>Not leaving things unknown</span></h2>
+  <p><span data-ko>이 클러스터에는 아직 고치지 못한 것들이 있습니다. 저장소에 <span class="mono">TODO.md</span>를 두고 <strong>무엇이 문제이고 왜 지금 그 상태인지</strong>를 근거와 함께 적어 둡니다. 숨기면 다음 사람이 같은 함정을 다시 밟습니다.</span><span data-en>This cluster still has unfixed problems. A <span class="mono">TODO.md</span> in the repository records <strong>what is wrong and why it is currently that way</strong>, with the reasoning. Hidden, they become traps the next person walks into.</span></p>
+  <table>
+    <thead><tr><th style="width:38%"><span data-ko>알려진 제약</span><span data-en>Known limitation</span></th><th><span data-ko>현재 판단</span><span data-en>Current position</span></th></tr></thead>
+    <tbody>
+      <tr><td><span data-ko>노드가 전부 단일 가용영역</span><span data-en>All nodes in one availability zone</span></td><td><span data-ko>노드 간 트래픽 비용과 장애 반경을 맞바꾼 구성입니다. 서비스가 둘이 된 지금은 재검토 대상입니다.</span><span data-en>A deliberate trade of blast radius for free inter-node traffic. With two services on it, this is up for review.</span></td></tr>
+      <tr><td><span data-ko>네임스페이스가 DB 접근을 막지 못함</span><span data-en>Namespaces do not restrict database access</span></td><td><span data-ko>파드가 노드 IP로 나가기 때문에 보안 그룹으로는 분리되지 않습니다. NetworkPolicy가 유일한 수단이고 아직 없습니다.</span><span data-en>Pods egress as the node, so security groups cannot separate them. A NetworkPolicy is the only real answer, and it is not written yet.</span></td></tr>
+      <tr><td><span data-ko>요청 자원이 실사용의 7배</span><span data-en>Resource requests are 7× actual use</span></td><td><span data-ko>노드가 실제보다 꽉 차 보입니다. 줄이되 7일 평균과 최대치를 정확히 측정한 뒤에 — 한가한 시간 스냅샷으로 정하면 피크에 밀립니다.</span><span data-en>Nodes look fuller than they are. Worth reducing, but only after measuring a week of averages and peaks — sizing from a quiet snapshot fails under load.</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="block">
+  <h2><span data-ko>지금</span><span data-en>Where it stands</span></h2>
+  <div class="outcome">
+    <ul>
+      <li><span data-ko>애플리케이션 51개가 하나의 클러스터에서 돌고, 배포 경로가 서비스마다 같습니다.</span><span data-en>51 applications on one cluster, every service deploying the same way.</span></li>
+      <li><span data-ko>무엇이 떠 있는지 git으로 되짚을 수 있습니다. 롤백은 되돌리기 커밋 하나입니다.</span><span data-en>What is running is traceable through git, and a rollback is one revert commit.</span></li>
+      <li><span data-ko>새 인프라 관리자가 계정 발급부터 클러스터 접근까지 따라올 수 있는 온보딩 문서를 함께 두었습니다.</span><span data-en>An onboarding document takes a new infrastructure maintainer from account creation to cluster access.</span></li>
+    </ul>
+  </div>
+</section>
+
+
+<div class="casenav">
+  <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
+  <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
+  <a href="/cases/silent-failures.html"><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></a>
+  <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+</div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-ko>이원주 · 소프트웨어 엔지니어</span><span data-en>Wonju Lee · Software Engineer</span>
+    <span class="mono">2026</span>
+  </div>
+</footer>
+
+</body>
+</html>

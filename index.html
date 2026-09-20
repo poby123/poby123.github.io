@@ -1,51 +1,452 @@
 <!DOCTYPE html>
-<html lang="ko">
-
+<html lang="ko" data-lang="ko" data-title-en="Wonju Lee — Software Engineer">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Otomanopee+One&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/resources/index.css" />
-    <title>원주의 Memo</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이원주 — 소프트웨어 엔지니어</title>
+<meta name="description" content="통신사 회선부터 교환기, 대기열, AI 응대, 상담원 앱까지. 전화가 연결되는 모든 구간을 설계하고 운영하는 백엔드·인프라 엔지니어.">
+<meta property="og:title" content="이원주 — 소프트웨어 엔지니어">
+<meta property="og:description" content="전화가 연결되는 모든 구간을 직접 만들었습니다. 제로콜 전화 인프라 · AI 응대 · 공간히어로 예약 연동 · k3s 플랫폼.">
+<meta property="og:type" content="profile">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('wonju.lang')||'ko';document.documentElement.dataset.lang=l;document.documentElement.lang=l;}catch(e){}document.documentElement.className='anim';</script>
+<script src="/assets/site.js" defer></script>
 </head>
-
 <body>
-    <section class="index">
-        <div class="container">
-            <h1 id="title-header"><a name="Categories" href="#Categories">WONJU's MEMO</a></h1>
-        </div>
-    </section>
-    <section class="content">
-        <div class="container">
-            <h2 id="Categories">
-                Categories
-            </h2>
-            <ul>
-    
-            <li>
-                <a href="/deploy/JPA.html">JPA(3)</a>
-            </li>
-        
-    
-            <li>
-                <a href="/deploy/Socket.html">Socket(1)</a>
-            </li>
-        
-    
-            <li>
-                <a href="/deploy/일기.html">일기(1)</a>
-            </li>
-        
-    
-</ul>
-        </div>
-    </section>
 
-    <script src="/resources/index.js"></script>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><span data-ko>이원주 <i>· 소프트웨어 엔지니어</i></span><span data-en>Wonju Lee <i>· Software Engineer</i></span></a>
+    <nav>
+      <a href="#work" class="hide-sm"><span data-ko>경력</span><span data-en>Work</span></a>
+      <a href="#cases" class="hide-sm"><span data-ko>케이스 스터디</span><span data-en>Case studies</span></a>
+      <a href="#contact"><span data-ko>연락</span><span data-en>Contact</span></a>
+      <span class="langswitch">
+        <button type="button" data-set-lang="ko" aria-pressed="true">KO</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ── 히어로 ────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="wrap">
+    <div class="letterhead">
+      <img src="/assets/img/portrait.jpg" width="84" height="112"
+           alt="이원주" loading="eager" decoding="async">
+      <div class="who">
+        <div class="name">
+          <span data-ko>이원주 <i>· 소프트웨어 엔지니어</i></span><span data-en>Wonju Lee <i>· Software Engineer</i></span>
+        </div>
+        <div class="meta">
+          <a href="mailto:i2pir@naver.com">i2pir@naver.com</a> ·
+          <a href="https://github.com/poby123" rel="noreferrer">github.com/poby123</a><br>
+          <span data-ko>서울 · 플로버(전 드랍스튜디오)</span><span data-en>Seoul · Flover (formerly Drop Studio)</span>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="display">
+      <span data-ko>스키마 첫 줄부터<br>사용자가 누르는 버튼까지,<br>시스템 하나를 통째로 세웁니다.</span>
+      <span data-en>From the first line of schema to the button in someone’s hand — I stand up the whole system.</span>
+    </h1>
+    <p class="lead">
+      <span data-ko>플로버에서 공간히어로와 제로콜을 첫 커밋부터 만들고 운영합니다. 테이블을 설계하고, API와 배치를 짜고, 웹과 앱을 만들고, 그것들이 올라갈 클러스터까지 세웁니다. 구조를 정하는 큰 결정과 사용자가 걸려 넘어지는 작은 것을 같이 봐 왔습니다.</span>
+      <span data-en>At Flover I build and run Gonggan Hero and ZeroCall from the first commit — designing the tables, writing the APIs and the batch jobs, building the web and the apps, and standing up the cluster they run on. The structural calls and the small thing a user trips over have both been mine.</span>
+    </p>
+
+    <figure class="trace">
+      <svg viewBox="0 0 900 286" role="img" aria-label="단말과 앱부터 회선과 교환기까지, 맡아 온 계층">
+        <path class="d-thin" d="M188,10 V276"/>
+        <g class="msgs">
+          <g class="msg">
+            <text class="d-h" x="176" y="30" text-anchor="end"><tspan data-ko>단말 · 앱</tspan><tspan data-en>Devices & apps</tspan></text>
+            <text class="d-s" x="204" y="30"><tspan data-ko>React Native · Kotlin/Swift 네이티브 SIP · CallKit · Electron 데스크톱 · PyQt 키오스크</tspan><tspan data-en>React Native · native SIP in Kotlin/Swift · CallKit · Electron desktop · PyQt kiosk</tspan></text>
+            <path class="d-thin" d="M204,46 H880"/>
+          </g>
+          <g class="msg">
+            <text class="d-h" x="176" y="74" text-anchor="end"><tspan data-ko>웹</tspan><tspan data-en>Web</tspan></text>
+            <text class="d-s" x="204" y="74"><tspan data-ko>Next.js · React · 호스트 · 게스트 · 관리자 · 매출 대시보드 · 임베드 위젯</tspan><tspan data-en>Next.js · React · host · guest · admin · revenue dashboards · embeddable widget</tspan></text>
+            <path class="d-thin" d="M204,90 H880"/>
+          </g>
+          <g class="msg">
+            <text class="d-h" x="176" y="118" text-anchor="end"><tspan data-ko>API · 배치</tspan><tspan data-en>APIs & jobs</tspan></text>
+            <text class="d-s" x="204" y="118"><tspan data-ko>NestJS 모노레포 · Bull 큐 · 스케줄러 · 크롤러 · 결제 · 정산 · AI 에이전트</tspan><tspan data-en>NestJS monorepos · Bull queues · schedulers · crawlers · billing · settlement · AI agents</tspan></text>
+            <path class="d-thin" d="M204,134 H880"/>
+          </g>
+          <g class="msg">
+            <text class="d-h" x="176" y="162" text-anchor="end"><tspan data-ko>데이터</tspan><tspan data-en>Data</tspan></text>
+            <text class="d-s" x="204" y="162"><tspan data-ko>MySQL 스키마 설계 · TypeORM · Redis · 분산 락 · 마이그레이션 · 암호화 · 보관 정책</tspan><tspan data-en>MySQL schema design · TypeORM · Redis · distributed locks · migrations · encryption · retention</tspan></text>
+            <path class="d-thin" d="M204,178 H880"/>
+          </g>
+          <g class="msg">
+            <text class="d-h" x="176" y="206" text-anchor="end"><tspan data-ko>인프라</tspan><tspan data-en>Infrastructure</tspan></text>
+            <text class="d-s" x="204" y="206"><tspan data-ko>k3s · Argo CD · Terraform · Traefik · NLB · 배포 파이프라인 · 시크릿 관리</tspan><tspan data-en>k3s · Argo CD · Terraform · Traefik · NLB · delivery pipelines · secret management</tspan></text>
+            <path class="d-thin" d="M204,222 H880"/>
+          </g>
+          <g class="msg">
+            <text class="d-h" x="176" y="250" text-anchor="end"><tspan data-ko>회선 · 교환기</tspan><tspan data-en>Lines & PBX</tspan></text>
+            <text class="d-s" x="204" y="250"><tspan data-ko>Kamailio · rtpengine · Asterisk · 통신사 회선 · 고객사 교환기 연동</tspan><tspan data-en>Kamailio · rtpengine · Asterisk · carrier trunks · customer PBX integration</tspan></text>
+            <path class="d-thin" d="M204,266 H880"/>
+          </g>
+        </g>
+      </svg>
+      <figcaption>
+        <span data-ko>지금까지 맡아 온 계층입니다. 제품마다 범위는 달랐지만, 한 제품을 맡으면 대체로 이 전부를 만들었습니다.</span>
+        <span data-en>The layers I have owned. The range differed by product, but when a product was mine I generally built all of it.</span>
+      </figcaption>
+    </figure>
+
+    <ul class="facts">
+      <li><b>6</b><span data-ko>개 제품을 첫 커밋부터 운영까지 만들었습니다</span><span data-en>products taken from first commit to production</span></li>
+      <li><b>674</b><span data-ko>개 공간의 예약을 7개 플랫폼에서 3분 주기로 동기화</span><span data-en>spaces synced across 7 booking platforms every 3 min</span></li>
+      <li><b>51</b><span data-ko>개 애플리케이션이 도는 k3s 클러스터를 직접 구축</span><span data-en>applications on the k3s cluster I built and run</span></li>
+      <li><b>800<span data-ko>명</span></b><span data-ko>이 제로콜에서 070 번호를 발급받아 쓰고 있습니다</span><span data-en>people have taken a 070 number on ZeroCall</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ── 경력 ──────────────────────────────────────────────── -->
+<section id="work">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2><span data-ko>경력</span><span data-en>Work</span></h2>
+      <p>
+        <span data-ko>2023년부터 플로버(전 드랍스튜디오)에서 제품을 처음부터 만들고, 사용자가 붙은 뒤에도 계속 운영해 왔습니다. 아래는 제가 설계 결정을 내리고 끝까지 책임진 것들입니다.</span>
+        <span data-en>Since 2023 I have built products at Flover (formerly Drop Studio) from the first commit and kept running them after real users arrived. Below is the work whose design decisions were mine to make and to live with.</span>
+      </p>
+    </div>
+
+    <!-- 제로콜 -->
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2025.11 – <span data-ko>현재</span><span data-en>present</span></span>
+        <span class="org"><span data-ko>플로버 (전 드랍스튜디오)</span><span data-en>Flover (formerly Drop Studio)</span></span>
+        <span class="stack mono">Kamailio · rtpengine · Asterisk ARI · NestJS · MySQL · Redis/Bull · WebRTC · React Native · Electron</span>
+      </div>
+      <div>
+        <h3><a href="https://zerocall.kr" rel="noreferrer">제로콜 <span data-en>(ZeroCall)</span></a></h3>
+        <p class="role"><span data-ko>전화 시스템 설계 · 백엔드 · 인프라 · 클라이언트 리드</span><span data-en>Lead — telephony architecture, backend, infrastructure, clients</span></p>
+        <p>
+          <span data-ko>070 전화·문자와 AI 전화 응대를 함께 제공하는 서비스입니다. 통신사 회선을 받는 SIP 프론트엔드부터 교환기, 대기열, ARS, 녹음·전사·요약, 상담원 앱과 PC 에이전트까지 전 구간을 만들었습니다. 지금은 메가스터디 학원 현장에 도입되어 본사와 지점이 함께 쓰고 있습니다.</span>
+          <span data-en>A 070 phone and messaging service with an AI agent that answers calls. I built the whole path: the SIP front end that faces the carrier, the PBX, the queue, the IVR, recording, transcription and summarisation, plus the mobile app and the desktop agent. It is now deployed inside Megastudy’s academies, used by both head office and branches.</span>
+        </p>
+        <ul class="bullets">
+          <li><span data-ko><strong>교환기부터 직접 세웠습니다.</strong> Asterisk를 올리고 다이얼플랜을 작성한 뒤, NestJS로 만든 call-handler를 ARI로 붙여 인입·발신·녹음·전환 흐름을 하나씩 연결했습니다.</span><span data-en><strong>I stood the exchange up myself.</strong> Asterisk, then the dialplan, then a NestJS call-handler attached over ARI — wiring inbound, outbound, recording and transfer one flow at a time.</span></li>
+          <li><span data-ko><strong>가입자별 설정은 다이얼플랜에 박지 않고, 통화가 들어올 때 조회하게</strong> 만들었습니다. 다이얼플랜은 파일 한 벌로 두고, 착신번호·그룹·착신전환·영업시간은 그때그때 DB에서 읽습니다. 그래서 사용자가 화면에서 바꾼 설정이 교환기를 건드리지 않고 반영되고, 가입하면 SIP 계정도 자동으로 발급됩니다.</span><span data-en><strong>Per-subscriber settings are looked up when a call arrives, not baked into the dialplan.</strong> The dialplan stays a single set of files; the dialled number, group, forwarding and business hours are read from the database at call time. So a change made in the web UI takes effect without touching the exchange, and signing up provisions a SIP account automatically.</span></li>
+          <li><span data-ko><strong>단일 Asterisk를 Kamailio + rtpengine 앞단 구조로 전환</strong>했습니다. 바깥에서 보이는 주소와 포트를 하나도 바꾸지 않아 통신사 협의도, 현장 전화기 재설정도 없이 끝냈습니다.</span><span data-en><strong>Replaced a single Asterisk with a Kamailio + rtpengine front end.</strong> Not one externally visible address or port changed, so it shipped without renegotiating with the carrier or touching a single phone on site.</span></li>
+          <li><span data-ko><strong>대기열과 ARS를 직접 구현</strong>했습니다. Asterisk 내장 큐는 단말이 항상 등록돼 있다고 전제하는데, 모바일은 푸시로 깨워야 해서 맞지 않았습니다. 분배기를 Node에서 ARI로 구현했습니다.</span><span data-en><strong>Wrote the queue and IVR myself.</strong> Asterisk's built-in queue assumes endpoints stay registered; mobile endpoints have to be woken by push. So the distributor runs in Node over ARI instead.</span></li>
+          <li><span data-ko><strong>AI 응대 하네스를 만들었습니다.</strong> 업종별 에이전트와 도구를 갈아 끼우고, 실시간 음성 모델을 통화 미디어에 직접 물립니다. 필요하면 대화 도중 사람에게 넘깁니다.</span><span data-en><strong>Built the AI answering harness</strong> — per-industry agents and tools that swap in behind one interface, wired straight into the call's media, and able to hand the caller to a human mid-conversation.</span></li>
+          <li><span data-ko><strong>시험 층을 따로 만들었습니다.</strong> 단위 시험이 닿지 못하는 다이얼플랜 로직은 원본에서 쿼리를 꺼내 실제 DB에 돌려 확인하고, 처리 용량은 CPU가 아니라 이벤트 루프 지연으로 판정하는 부하 시험으로 잽니다.</span><span data-en><strong>Built the test layers.</strong> Dialplan logic unit tests cannot reach is verified by lifting its query from the source file and running it against the real database; capacity is measured by event-loop lag under load rather than CPU.</span></li>
+        </ul>
+        <p class="small muted" style="margin-bottom:1rem">
+          <span data-ko><strong>통신 표준과 통신사 규격 문서를 근거로</strong> 설계했습니다. 서버 모노레포 8개 앱 약 24만 줄에, 관리 웹 3종·모바일 앱·PC 에이전트가 함께 붙어 있습니다. 전화 외에도 문자 송수신(통신사 통합메시징 연동과 전송자격인증 준비), 구독 결제 스케줄링, 고객사 웹사이트에 붙이는 상담 위젯(iframe + postMessage)을 함께 만들었습니다.</span>
+          <span data-en>The design is <strong>grounded in the telecom standards and the carrier’s specifications.</strong> A server monorepo of 8 apps at ~240k lines, plus three admin web clients, the mobile app and the desktop agent. Beyond calls I also built SMS/MMS (carrier messaging integration and the sender-authentication filings), subscription billing, and the chat widget customers embed in their own sites (iframe + postMessage).</span>
+        </p>
+        <p class="small">
+          <a class="more" href="/cases/zerocall-telephony.html"><span data-ko>전화 인프라 이중화 →</span><span data-en>Telephony HA →</span></a>
+          &nbsp;&nbsp;
+          <a class="more" href="/cases/silent-failures.html"><span data-ko>검증과 배포 →</span><span data-en>Testing & deployment →</span></a>
+          &nbsp;&nbsp;
+          <a class="more" href="/cases/zerocall-ai.html"><span data-ko>AI 응대 · 대기열 · 단말 →</span><span data-en>AI, queue & devices →</span></a>
+        </p>
+      </div>
+    </article>
+
+    <!-- 공간히어로 -->
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2024.03 – <span data-ko>현재</span><span data-en>present</span></span>
+        <span class="org"><span data-ko>플로버 (전 드랍스튜디오)</span><span data-en>Flover (formerly Drop Studio)</span></span>
+        <span class="stack mono">NestJS · TypeORM · MySQL · Redis/Bull · Next.js · NextAuth · Playwright</span>
+      </div>
+      <div>
+        <h3><a href="https://gongganhero.com/" rel="noreferrer">공간히어로 <span data-en>(Gonggan Hero)</span></a></h3>
+        <p class="role"><span data-ko>기획 참여 · 개발 리드 · 운영</span><span data-en>Product input, engineering lead, operations</span></p>
+        <p>
+          <span data-ko>댄스 연습실·파티룸·회의실을 빌려주는 사장님들을 위한 SaaS입니다. 511명의 호스트가 674개 공간을 등록했고, 네이버·스페이스클라우드·여기어때·아워플레이스 등 7개 플랫폼의 예약을 하루 1,400건씩 가져와 한 캘린더로 합칩니다.</span>
+          <span data-en>SaaS for people who rent out dance studios, party rooms and meeting rooms. 511 hosts have registered 674 spaces, and the system pulls ~1,400 reservations a day from 7 platforms — Naver, SpaceCloud, Yeogi, Hourplace and others — into one calendar.</span>
+        </p>
+        <ul class="bullets">
+          <li><span data-ko><strong>중복 예약을 막는 것이 이 제품의 본질</strong>이었습니다. 한 번 겹치면 사장님이 고객에게 사과하고 환불해야 하므로, 플랫폼별 수집 주기를 3분 이내로 유지해야 했습니다. 크롤러를 플랫폼·샤드 단위로 나눠 병렬화하고 Bull 큐로 동기화 순서를 지켰습니다.</span><span data-en><strong>Preventing double bookings is the product.</strong> One collision means the host apologising and refunding, so every platform had to be re-read inside three minutes. I sharded the crawlers per platform and kept sync ordering with Bull queues.</span></li>
+          <li><span data-ko><strong>한 플랫폼에 같은 공간을 여러 개 걸어 두는 사장님들이 계셨습니다.</strong> 처음에는 플랫폼당 공간 하나만 연결할 수 있게 만들었는데, 피드백을 받고 다대다로 바꿨습니다. 경쟁사와 벌어진 차이는 대부분 이런 데서 나왔습니다.</span><span data-en><strong>Some hosts list the same room several times on one platform.</strong> The first version allowed one mapping per platform; after their feedback I made it many-to-many. Most of our edge over competitors came from changes like this one.</span></li>
+          <li><span data-ko><strong>예약 확정·리마인드·종료 알림톡을 자동 발송</strong>합니다. 리마인드에는 예약 종료 시각에 스스로 만료되는 출입 비밀번호 안내 링크를 함께 보냅니다.</span><span data-en><strong>Automated confirmation, reminder and check-out messages.</strong> The reminder carries a door-code page whose link expires by itself when the booking ends.</span></li>
+          <li><span data-ko><strong>구독 청구와 정산, 도어락까지 이 제품 안에 있습니다.</strong> 결제 수단 등록과 월 구독 스케줄링, 친구 초대 크레딧과 쿠폰, 예약 건별 정산과 결제 링크, 그리고 예약 시간에만 열리는 IoT 도어락 연동을 만들었습니다.</span><span data-en><strong>Billing, settlement and the door lock all live in this product too.</strong> I built card registration and monthly subscription scheduling, referral credit and coupons, per-booking settlement and pay links, and the IoT door lock that only opens during the booking.</span></li>
+          <li><span data-ko><strong>매출 대시보드와 캘린더를 제공</strong>합니다. 일·주·월별 매출과 플랫폼별 비중을 예약 데이터에서 바로 계산합니다. 주 사용자가 40~60대 사장님들이라 화면은 단순하게, 기능은 강하게 잡았습니다.</span><span data-en><strong>Revenue dashboard and calendar</strong> computed straight from reservation data — daily, weekly, monthly, and by platform. Most hosts are in their 40s–60s, so the screens stay plain while the machinery underneath does the work.</span></li>
+        </ul>
+        <p class="small muted" style="margin-bottom:1rem"><span data-ko>서버 모노레포 15개 앱 약 10만 줄 · 커밋 1,180여 개, 호스트 웹 5만 4천 줄은 다른 개발자와 나눠 만들었습니다. 예약 연동 외에도 플랫폼 로그인 세션을 따로 관리하는 앱, 알림톡 발송을 위한 전송자격인증 대응, 매장이 많은 계정에서 응답하지 않던 <strong>매출 대시보드 조회를 3~4.5초에서 0.2초 이하로</strong> 줄이는 작업을 했습니다.</span><span data-en>A server monorepo of 15 apps at ~100k lines over 1,180+ commits; the 54k-line host web client was built together with another developer. Beyond the reservation sync I built the app that keeps each platform’s login session alive, the sender-authentication work required to send messages, and <strong>cut the revenue dashboard from 3–4.5 seconds to under 0.2</strong> for accounts with many venues.</span></p>
+        <p class="small"><a class="more" href="/cases/gonggan-hero.html"><span data-ko>케이스 스터디 →</span><span data-en>Case study →</span></a></p>
+      </div>
+    </article>
+
+    <!-- 인프라 -->
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2026.07 – <span data-ko>현재</span><span data-en>present</span></span>
+        <span class="org"><span data-ko>플로버</span><span data-en>Flover</span></span>
+        <span class="stack mono">k3s · Argo CD · Terraform · Traefik · NLB · SealedSecrets · GitHub Actions</span>
+      </div>
+      <div>
+        <h3><span data-ko>플랫폼 인프라 — k3s 전환</span><span data-en>Platform infrastructure — moving to k3s</span></h3>
+        <p class="role"><span data-ko>설계 · 구축 · 운영</span><span data-en>Design, build, operation</span></p>
+        <p>
+          <span data-ko>서비스가 둘, 셋으로 늘면서 EC2에 흩어진 애플리케이션을 한 곳에서 보기 어려워졌습니다. 서버비와 조직 규모를 고려해 EKS 대신 k3s를 골라 클러스터를 직접 세우고, 애플리케이션 51개를 GitOps로 옮겼습니다.</span>
+          <span data-en>As one service became three, applications scattered across EC2 stopped being legible from one place. Weighing cost against the size of the team, I chose k3s over EKS, stood up the cluster myself, and moved 51 applications onto GitOps.</span>
+        </p>
+        <ul class="bullets">
+          <li><span data-ko><strong>배포 시점은 사람이 정합니다.</strong> CI는 이미지 태그만 커밋하고 Argo CD가 차이를 표시한 채 기다립니다. 이미지 태그는 커밋 SHA로 고정해 "지금 뭐가 떠 있는지"를 git으로 되짚을 수 있게 했습니다.</span><span data-en><strong>Humans decide when to deploy.</strong> CI only commits an image tag; Argo CD shows the drift and waits. Tags are pinned to commit SHAs, so what is running is always traceable back through git.</span></li>
+          <li><span data-ko><strong>노드 한 대가 흔들리면 사용자 25%가 실패하던 구조를 개선했습니다.</strong> A레코드에 노드 IP를 나열한 라운드로빈 DNS에는 헬스체크가 없습니다. 앞단에 NLB를 세워 L4 패스스루로 흘리도록 바꿨습니다.</span><span data-en><strong>Fixed a setup where one shaky node failed 25% of users.</strong> Round-robin DNS across node IPs has no health check; I put an NLB in front and passed TLS through at L4.</span></li>
+          <li><span data-ko><strong>통신사 화이트리스트에 묶인 발신 IP를 전용 노드로 격리</strong>했습니다. taint를 걸어 다른 파드가 그 주소로 나가지 못하게 했습니다.</span><span data-en><strong>Isolated the carrier-whitelisted egress IP onto a dedicated, tainted node</strong> so no other pod can leave the cluster through that address.</span></li>
+        </ul>
+        <p class="small muted"><span data-ko>Terraform과 Argo CD 매니페스트 약 3,900줄 · 커밋 59개. 코드보다 중요한 것이 문서라고 보고, 새 인프라 관리자가 계정 발급부터 클러스터 접근까지 따라올 수 있는 온보딩 문서와 미결 항목을 근거와 함께 남겼습니다.</span><span data-en>About 3,900 lines of Terraform and Argo CD manifests over 59 commits. Documentation mattered more than the code here: a new maintainer can follow the onboarding from account creation to cluster access, and every open item is written down with its reasoning.</span></p>
+        <p class="small"><a class="more" href="/cases/infra.html"><span data-ko>케이스 스터디 →</span><span data-en>Case study →</span></a></p>
+      </div>
+    </article>
+
+    <!-- 춤춤 -->
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2024.02 – 2024.03</span>
+        <span class="org"><span data-ko>드랍스튜디오</span><span data-en>Drop Studio</span></span>
+        <span class="stack mono">NestJS · TypeORM · MySQL · Bull · Next.js · NextAuth · Bootpay</span>
+      </div>
+      <div>
+        <h3>춤춤 <span data-en>(Chumchum)</span></h3>
+        <p class="role"><span data-ko>서버 · 웹 개발 리드</span><span data-en>Engineering lead — server and web</span></p>
+        <p><span data-ko>춤추는 사람들을 위한 댄스 연습실 예약 플랫폼입니다. 게스트 API, 호스트 API, 관리자, 백그라운드 워커로 나눈 모노레포와 호스트·게스트 웹 두 벌을 만들었습니다.</span><span data-en>A booking platform for dance practice rooms — a monorepo split into guest API, host API, admin and a background worker, plus two separate web clients for hosts and guests.</span></p>
+        <ul class="bullets">
+          <li><span data-ko><strong>가장 어려웠던 것은 예약 변경이었습니다.</strong> 예약과 결제가 다대다입니다. 한 번의 결제가 여러 예약에 걸쳐 있고, 연속 시간대 묶음 할인 때문에 <strong>예약 하나를 취소하면 남은 예약의 가격이 오릅니다.</strong> 그래서 환불액은 "환불 가능액 − 남은 예약의 인상분"이고, 그 금액을 감당할 수 있는 결제 건을 골라 거기서 환불합니다.</span><span data-en><strong>Rebooking was the hard part.</strong> Reservations and payments are many-to-many: one payment can cover several bookings, and because consecutive hours are discounted as a block, <strong>cancelling one booking raises the price of the ones that remain.</strong> So the refund is "refundable amount minus the increase on what is left", charged against a payment large enough to absorb it.</span></li>
+          <li><span data-ko><strong>부분 환불과 추가 결제를 한 흐름으로</strong> 묶었습니다. 변경 후 금액이 낮아지면 차액을 환불하고, 높아지면 추가로 결제합니다. 취소 수수료도 이 계산에 함께 들어갑니다. 결과가 음수가 되면 지원하지 않는 변경으로 막습니다 — 돈이 맞지 않는 채로 통과시키는 것보다 낫습니다.</span><span data-en><strong>Partial refunds and top-up charges run through one path.</strong> If the new total is lower we refund the difference; if it is higher we charge it, with the cancellation fee folded into the same sum. If the result would be negative the change is rejected as unsupported — better than letting the books go wrong.</span></li>
+          <li><span data-ko>예약 리마인드 알림톡, 예약 변경 감시, 정산 모니터링은 <strong>별도 워커</strong>가 Bull 큐로 처리합니다. 사용자 요청 경로에서 떼어 놓아야 결제 응답이 알림 발송 때문에 느려지지 않습니다.</span><span data-en>Reminder messages, change monitoring and settlement checks run in a <strong>separate worker</strong> over Bull queues — off the request path, so a payment response never waits on a notification.</span></li>
+          <li><span data-ko>구글·카카오·네이버·애플 소셜 로그인, 호스트의 공간 등록과 가격 설정, 정산까지 직접 만들었습니다.</span><span data-en>Google, Kakao, Naver and Apple sign-in, host-side space registration and pricing, and settlement — all built in-house.</span></li>
+        </ul>
+        <p class="small muted"><span data-ko>서버 2만 줄, 호스트·게스트 웹 2만 2천 줄. 두 달 동안 혼자 만들었습니다.</span><span data-en>20k lines of server and 22k lines across the host and guest web clients — built alone in two months.</span></p>
+      </div>
+    </article>
+
+    <!-- 카공24 -->
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2023.12 – 2024.01</span>
+        <span class="org"><span data-ko>드랍스튜디오</span><span data-en>Drop Studio</span></span>
+        <span class="stack mono">React · TypeScript · Redux Toolkit · React Query · styled-components · Bootpay · i18next · Docker · nginx</span>
+      </div>
+      <div>
+        <h3>카공24 <span data-en>(Cagong24)</span></h3>
+        <p class="role"><span data-ko>프론트엔드 전담 · 배포</span><span data-en>Sole frontend developer, deployment</span></p>
+        <p><span data-ko>문 닫은 카페를 야간에 예약해 혼자 쓰는 서비스입니다. 매장 배너의 QR로 들어오는 모바일 웹이라 첫 화면이 곧 첫인상이었고, 서버는 다른 분이 맡아 저는 화면 전부와 배포를 담당했습니다.</span><span data-en>Book a closed café for yourself at night. People arrive by scanning a QR banner in the shop, so the first screen is the first impression. A colleague owned the server; I owned every screen and the deployment.</span></p>
+        <ul class="bullets">
+          <li><span data-ko><strong>처음 온 사람이 결제까지 끊기지 않고 가야 했습니다.</strong> 휴대폰 인증 → 날짜·시간 선택 → 결제 → 예약 확인을 한 흐름으로 만들고, 인증 상태를 유지해 뒤로 가기로 돌아와도 인증 화면을 다시 지나지 않게 했습니다.</span><span data-en><strong>A first-time visitor had to reach payment without a break.</strong> Phone verification, date and time, payment and confirmation run as one flow, and the verified state persists so going back never drops you into the verification screen again.</span></li>
+          <li><span data-ko><strong>예약 확인 화면을 이미지로 저장</strong>할 수 있게 했습니다. 매장 문 앞에서 네트워크가 끊겨도 결제 내역을 보여 줄 수 있어야 했습니다.</span><span data-en><strong>The confirmation screen saves as an image.</strong> Standing at the shop door with no signal, you still need to be able to show what you paid for.</span></li>
+          <li><span data-ko>유학생 손님이 많아 <strong>영어를 함께 지원</strong>했고, 빵 같은 부가 상품은 판매 가능한 시간대를 화면에서 먼저 막았습니다. 결제까지 갔다가 거절당하는 것보다 낫습니다.</span><span data-en>Many customers were international students, so it <strong>ships bilingual</strong>. Add-on items are gated by their selling hours in the UI — better than being refused after you have already paid.</span></li>
+          <li><span data-ko><strong>느린 첫 화면을 직접 줄였습니다.</strong> 이미지를 webp로, 폰트를 woff로 일괄 변환하는 스크립트를 짜서 넣었고, nginx에 정적 자원 캐시 헤더와 gzip을 걸어 Docker 이미지로 배포했습니다.</span><span data-en><strong>I cut the first paint myself</strong> — wrote the scripts that batch-convert images to webp and fonts to woff, set cache headers and gzip in nginx, and shipped it as a Docker image.</span></li>
+        </ul>
+        <p class="small muted"><span data-ko>약 6,500줄 · 커밋 33개. 서버는 다른 개발자가 맡았고, 화면 전부와 배포를 담당했습니다.</span><span data-en>About 6,500 lines over 33 commits. A colleague owned the server; every screen and the deployment were mine.</span></p>
+      </div>
+    </article>
+
+    <!-- 쉐어드랍 -->
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2023.06 – 2023.07</span>
+        <span class="org"><span data-ko>드랍스튜디오</span><span data-en>Drop Studio</span></span>
+        <span class="stack mono">NestJS · TypeORM · MySQL · Redis (Redlock) · cheerio · Spring Boot · JPA · QueryDSL</span>
+      </div>
+      <div>
+        <h3>쉐어드랍 <span data-en>(ShareDrop)</span></h3>
+        <p class="role"><span data-ko>백엔드 전담 · 관리자 페이지 · 앱 유지보수</span><span data-en>All backend, admin console, app maintenance</span></p>
+        <p><span data-ko>쇼핑몰에서 마음에 든 상품 페이지를 ‘공유’하면 앱이 대신 주문해 주는 서비스입니다. 백엔드 전체와 관리자 페이지를 맡았습니다.</span><span data-en>Share a product page from any shopping mall and the app orders it for you. I owned the entire backend and the admin console.</span></p>
+        <ul class="bullets">
+          <li><span data-ko><strong>서버가 쇼핑몰을 크롤링하지 않습니다.</strong> 사용자가 공유를 누른 순간 <strong>그 브라우저가 보고 있던 HTML을 그대로 받아</strong> 파싱합니다. 로그인 상태, 봇 차단, 동적 렌더링을 서버가 재현하려 애쓰는 대신 구조적으로 비껴간 선택이었습니다. 받은 문자열은 이스케이프를 복원한 뒤 몰별 파서로 넘어갑니다.</span><span data-en><strong>The server never crawls the malls.</strong> When the user taps share, we take <strong>the HTML their own browser was looking at</strong> and parse that. Rather than have the server reproduce a logged-in session, bot checks and client-side rendering, the design steps around all three. The received string is unescaped, then handed to a per-mall parser.</span></li>
+          <li><span data-ko><strong>쇼핑몰 29곳의 파서</strong>를 붙였습니다 — 쿠팡, 11번가, G마켓, 무신사, 29CM, 지그재그, 에이블리, 오늘의집, 네이버 스마트스토어, SSG, 롯데온 등. 등록되지 않은 도메인은 실패 대신 <strong>공통 파서로 기본 정보라도 복원</strong>합니다. 지원하지 않는 몰에서 왔다고 사용자가 빈 화면을 보게 두지 않으려는 것이었습니다.</span><span data-en><strong>Parsers for 29 shopping malls</strong> — Coupang, 11st, Gmarket, Musinsa, 29CM, Zigzag, Ably, Ohou, Naver Smart Store, SSG, Lotte On and more. An unknown domain does not fail: a <strong>generic parser recovers what it can</strong>, so nobody hits a blank screen just for shopping somewhere we had not mapped yet.</span></li>
+          <li><span data-ko>캐시 충전은 무통장 입금이라 입금 확인이 병목이었습니다. 처음에는 계좌 내역 조회를 크롤링으로 자동화했고, 이후 하이픈 연동으로 옮기면서 그쪽이 요구하는 프로토콜 때문에 <strong>별도 스프링부트 서버</strong>를 세워 출금 계좌를 다뤘습니다.</span><span data-en>Top-ups were bank transfers, so confirming them was the bottleneck. I first automated statement lookups by scraping, then moved to the Hyphen banking API — whose protocol needed a <strong>separate Spring Boot service</strong> to hold the withdrawal account.</span></li>
+          <li><span data-ko>출금에는 <strong>Redis 분산 락(Redlock)을 사용자 단위로</strong> 걸었습니다. 돈이 나가는 요청은 두 번 들어와도 한 번만 나가야 합니다.</span><span data-en>Withdrawals take a <strong>per-user distributed lock (Redlock)</strong>. A request that moves money must go out once even if it arrives twice.</span></li>
+        </ul>
+        <p class="small muted"><span data-ko>약 1만 1천 줄 · 커밋 76개를 혼자 썼습니다. 쇼핑몰 파서 29개가 그 안에 들어 있습니다.</span><span data-en>About 11k lines over 76 commits, written alone — including all 29 shopping-mall parsers.</span></p>
+      </div>
+    </article>
+
+    <!-- 리모 -->
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2023.05</span>
+        <span class="org"><span data-ko>드랍스튜디오</span><span data-en>Drop Studio</span></span>
+        <span class="stack mono">NestJS · GPT-3.5 · SSE · cheerio · cache-manager</span>
+      </div>
+      <div>
+        <h3><span data-ko>리모 — 리뷰의 모든 것</span><span data-en>Limo — everything about a review</span></h3>
+        <p class="role"><span data-ko>서버 전담 · AI 기능 구현</span><span data-en>All server work, AI features</span></p>
+        <p><span data-ko>상품 리뷰를 요약하고, 관련 블로그·티스토리·유튜브를 한 화면에 모아 주는 서비스입니다. 서버 전체와 AI 기능을 전담했습니다.</span><span data-en>Summarises a product’s reviews and gathers the related blog posts and videos in one view. I owned the whole server and the AI features.</span></p>
+        <ul class="bullets">
+          <li><span data-ko><strong>모델 응답이 길어 사용자가 멍하니 기다려야 했습니다.</strong> OpenAI 스트림을 받아 요약 본문과 장점·단점 태그를 파싱하면서 <strong>SSE로 흘려보냈습니다.</strong> 총 소요 시간은 그대로지만 체감 대기는 사라졌습니다.</span><span data-en><strong>The model was slow enough that users just sat and waited.</strong> I consumed the OpenAI stream, parsed the summary body and the pro/con tags out of it as they arrived, and <strong>pushed them to the client over SSE.</strong> The total time is unchanged; the waiting is gone.</span></li>
+          <li><span data-ko><strong>리뷰가 부족하면 요약하지 않습니다.</strong> 분량이 기준에 못 미치면 억지로 만들어 내는 대신 "요약할 만큼 리뷰가 없다"고 말하고 실제 리뷰 하나를 보여 줍니다. 그럴듯한 거짓 요약 하나가 제품 신뢰를 더 크게 깎습니다.</span><span data-en><strong>Too few reviews means no summary.</strong> Below the threshold it says so plainly and shows one real review instead of inventing something. A single plausible-but-false summary costs more trust than an empty state.</span></li>
+          <li><span data-ko>별점별로 리뷰를 한 건씩 뽑아 다섯 개를 보여 주는데, <strong>비어 있는 별점은 한 단계 위에서 채웁니다.</strong> 1점 리뷰가 없다고 칸을 비워 두면 화면이 고장 난 것처럼 보입니다.</span><span data-en>Reviews are sampled one per star rating; <strong>a missing rating is backfilled from the one above.</strong> Leaving a gap because nobody wrote a one-star review just looks broken.</span></li>
+          <li><span data-ko>요약 결과와 상품 카테고리 추론을 <strong>캐시</strong>했습니다. 같은 상품을 두 번째로 여는 사람은 모델을 부르지 않고 즉시 결과를 받습니다 — 응답 시간과 API 비용이 함께 줄었습니다.</span><span data-en>Summaries and inferred product categories are <strong>cached.</strong> The second person to open a product gets the result immediately without touching the model — cutting latency and API cost together.</span></li>
+        </ul>
+        <p class="small muted"><span data-ko>약 3,500줄 · 커밋 50개. 한 달 동안 서버와 AI 기능을 혼자 만들었습니다.</span><span data-en>About 3,500 lines over 50 commits — the server and the AI features, alone, in a month.</span></p>
+        <p class="small muted"><span data-ko>이 프로젝트를 하면서 개발이 프로그래밍이 아니라 비즈니스 문제를 푸는 일이라는 점을 배웠습니다.</span><span data-en>This is where I learned that the job is solving the business’s problem, not writing the program.</span></p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ── 기술 ──────────────────────────────────────────────── -->
+<section id="skills">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2><span data-ko>기술</span><span data-en>Tools</span></h2>
+      <p><span data-ko>실제 운영 중인 시스템에서 쓰고 있는 것부터 적었습니다.</span><span data-en>Listed in order of how much production traffic they currently carry.</span></p>
+    </div>
+    <div class="skills">
+      <div>
+        <h3><span data-ko>동시성 · 정합성 · 성능</span><span data-en>Concurrency, consistency, performance</span></h3>
+        <p><span data-ko>분산 락(Redlock) · Lua 원자적 처리 · 트랜잭션 경계 설계 · 큐 순서 보장 · 멱등 처리 · 인덱스와 조인 방향 튜닝 · 커넥션 풀 · 이벤트 루프 지연 측정</span><span data-en>Distributed locks (Redlock) · atomic Lua operations · transaction boundaries · queue ordering · idempotency · index and join-order tuning · connection pooling · event-loop lag measurement</span></p>
+      </div>
+      <div>
+        <h3><span data-ko>백엔드</span><span data-en>Backend</span></h3>
+        <p>NestJS, TypeScript, Node.js, TypeORM, MySQL, Redis, Bull, socket.io, SSE, Spring Boot, JPA, QueryDSL</p>
+      </div>
+      <div>
+        <h3><span data-ko>인프라 · 배포</span><span data-en>Infrastructure</span></h3>
+        <p>k3s, Argo CD, Terraform, Traefik, AWS (EC2 · NLB · VPN · S3 · KMS), Docker, GitHub Actions, SealedSecrets</p>
+      </div>
+      <div>
+        <h3><span data-ko>결제 · 정산 · 메시징</span><span data-en>Payments, settlement, messaging</span></h3>
+        <p><span data-ko>부트페이 결제 · 정기결제 · 부분환불, 정산과 결제 링크, 하이픈 뱅킹, 알림톡 · SMS · MMS, Playwright · cheerio 수집과 세션 관리</span><span data-en>Bootpay payments, subscriptions and partial refunds, settlement and pay links, Hyphen banking, KakaoTalk/SMS/MMS, Playwright and cheerio collection with session management</span></p>
+      </div>
+      <div>
+        <h3><span data-ko>전화 · 실시간 미디어</span><span data-en>Telephony & realtime media</span></h3>
+        <p>Kamailio, rtpengine, Asterisk (ARI · PJSIP · dialplan), SIP over WSS, WebRTC, DTLS-SRTP, ICE/TURN, G.711, RFC 4733 DTMF</p>
+      </div>
+      <div>
+        <h3><span data-ko>클라이언트</span><span data-en>Clients</span></h3>
+        <p>Next.js, React, React Query, Tailwind, React Native, Kotlin, Swift, CallKit, ConnectionService, Electron</p>
+      </div>
+      <div>
+        <h3>AI</h3>
+        <p>OpenAI Realtime, Gemini Live, Vertex AI, Google Speech-to-Text, <span data-ko>함수 호출 기반 에이전트 도구 설계</span><span data-en>function-calling agent tooling</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 케이스 스터디 ──────────────────────────────────────── -->
+<section id="cases">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2><span data-ko>케이스 스터디</span><span data-en>Case studies</span></h2>
+      <p><span data-ko>무엇을 만들었는지보다, 왜 그렇게 결정했고 무엇을 감수했는지를 적었습니다.</span><span data-en>Less about what got built, more about why it was decided that way and what it cost.</span></p>
+    </div>
+    <div class="casenav" style="border-top:0;padding-top:0">
+      <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
+      <a href="/cases/infra.html"><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></a>
+      <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
+      <a href="/cases/silent-failures.html"><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></a>
+      <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ── 그 이전 ───────────────────────────────────────────── -->
+<section id="before">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2><span data-ko>그 이전</span><span data-en>Before that</span></h2>
+    </div>
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2021.07</span>
+        <span class="org"><span data-ko>숭실대학교</span><span data-en>Soongsil University</span></span>
+        <span class="stack mono">NestJS · MySQL · TypeORM</span>
+      </div>
+      <div>
+        <h3><a href="https://github.com/poby123/2021ssuHackathon" rel="noreferrer"><span data-ko>교내 해커톤 — 매장 밀집도</span><span data-en>Campus hackathon — how crowded is that café</span></a></h3>
+        <p class="role"><span data-ko>개발 총괄 · 2위 수상</span><span data-en>Lead developer · second place</span></p>
+        <p><span data-ko>카페와 식당의 밀집도를 보여 줘 사람이 고르게 흩어지도록 유도하는 서비스를 사흘 만에 만들었습니다. QR 체크인, 사업자 스캐너, 권한별 화면 분기를 구현했습니다.</span><span data-en>Three days to build a service showing how full each café and restaurant was, so people would spread out. QR check-in, a scanner for owners, and role-based routing.</span></p>
+      </div>
+    </article>
+    <article class="entry">
+      <div class="entry-meta">
+        <span class="when">2020.09 – 2020.11</span>
+        <span class="org"><span data-ko>숭실대학교</span><span data-en>Soongsil University</span></span>
+        <span class="stack mono">Python3 · PyQt5 · multiprocessing · Raspberry Pi · MFRC522 · MLX90614 · HC-SR04 · Express.js · ejs</span>
+      </div>
+      <div>
+        <h3><span data-ko>창의적 공학설계 — 출입 체온 단말</span><span data-en>Engineering design — an entry thermometer kiosk</span></h3>
+        <p class="role"><span data-ko>회로 설계 · 단말 · 서버 전담 · 대상 수상</span><span data-en>Circuit, kiosk and server, sole developer · Grand prize</span></p>
+        <p><span data-ko>건물에 들어설 때 NFC 카드로 사람을 알아보고 체온을 재서 정상 여부를 보여 주는 키오스크입니다. 같은 데이터가 서버로 올라가 관리자가 구성원의 상태를 날짜별로 봅니다. <strong>회로 설계부터 단말 소프트웨어, 서버까지 전부 직접 만들었습니다.</strong> 지금 제가 하는 일의 원형이 여기 있습니다 — 하드웨어와 소프트웨어 사이에서 타이밍을 맞추는 일.</span><span data-en>A kiosk at the door: tap an NFC card, it recognises you, measures your temperature and tells you whether you are clear. The reading goes to a server where an administrator can review everyone by date. <strong>I designed the circuit, wrote the kiosk software and built the server.</strong> The shape of what I do now is already here — getting timing right between hardware and software.</span></p>
+
+        <h4 class="sub"><span data-ko>프로세스를 셋으로 나눈 이유</span><span data-en>Why it runs as three processes</span></h4>
+        <p><span data-ko>처음에는 스레드로 구현했습니다. 센서를 읽는 동안 화면이 얼어붙었습니다. 파이썬 GIL 때문에 스레드로는 센서 대기와 화면 갱신이 실제로 동시에 수행되지 않습니다. 그래서 <strong>화면(View) · 백그라운드 핸들러 · 서버 통신(Data Controller)</strong> 로 나누고, 하드웨어 제어는 그 아래 별도 모듈로 내렸습니다.</span><span data-en>I wrote it with threads first, and the screen froze while a sensor was being read — under Python’s GIL, waiting on a sensor and repainting the UI never truly overlap. So it became <strong>the view, a background handler, and a data controller</strong>, with hardware control in its own module underneath.</span></p>
+        <figure class="diagram inline">
+          <a href="/assets/img/kiosk-architecture.png" rel="noreferrer"><img src="/assets/img/kiosk-architecture.png" width="1400" height="787" loading="lazy" decoding="async"
+               alt="View(메인 프로세스)와 Handler(백그라운드 프로세스)가 request Q · response Q · interrupt 로 통신하고, Handler 아래에 하드웨어 제어 모듈과 서버 통신 모듈이 붙어 있는 구조도"></a>
+          <figcaption><span data-ko>당시 직접 그린 구조도입니다. 빨간색이 프로세스 사이를 오가는 큐와 플래그입니다.</span><span data-en>The architecture as I drew it at the time. The red boxes are the queues and flags that cross the process boundary.</span></figcaption>
+        </figure>
+        <ul class="bullets">
+          <li><span data-ko><strong>요청 큐 · 응답 큐 · 인터럽트 플래그</strong> 세 개로만 프로세스 사이를 잇습니다. 화면은 요청을 큐에 넣고 바로 돌아오고, 결과는 워커 스레드가 응답 큐에서 받아 화면에 반영합니다. 공유 메모리를 직접 만지지 않으니 경쟁 상태를 따로 막을 일이 없었습니다.</span><span data-en>The processes are joined by exactly three things: a <strong>request queue, a response queue and an interrupt flag</strong>. The UI enqueues a request and returns immediately; a worker thread picks the result off the response queue and paints it. Nothing touches shared memory directly, so there was no race to defend against.</span></li>
+          <li><span data-ko><strong>인터럽트 플래그가 핵심이었습니다.</strong> 체온은 4회 측정해 평균을 내는데 그 사이 사람이 떠날 수 있습니다. 측정 루프가 매 회차마다 공유 플래그를 확인해 즉시 중단하고 돌아옵니다. 이게 없으면 떠난 사람의 허공 온도가 정상 체온으로 기록됩니다.</span><span data-en><strong>The interrupt flag carried the design.</strong> A temperature is the average of four readings, and a person can walk away mid-way. The loop checks the shared flag between readings and bails out immediately — without it, the empty air after someone leaves gets recorded as a normal body temperature.</span></li>
+          <li><span data-ko><strong>측정 시점은 거리가 정합니다.</strong> 적외선 온도계는 거리에 민감해서 아무 때나 읽으면 값이 튑니다. 초음파 센서로 8cm 안쪽에 들어올 때까지 기다린 뒤에야 읽기 시작합니다.</span><span data-en><strong>Distance decides when to measure.</strong> An infrared thermometer is distance-sensitive, so reading at the wrong moment gives nonsense. An ultrasonic sensor holds the loop until the person is within 8 cm.</span></li>
+          <li><span data-ko>음성 안내는 TTS로 만들되 문장별로 파일 캐싱했습니다. 라즈베리파이에서는 매번 합성하는 그 한 번이 눈에 띄는 지연입니다.</span><span data-en>Spoken prompts are synthesised once and cached per sentence — on a Raspberry Pi, generating one each time is a visible pause.</span></li>
+        </ul>
+
+        <h4 class="sub"><span data-ko>회로도 직접 구성했습니다</span><span data-en>The circuit is mine too</span></h4>
+        <p><span data-ko>센서 세 종류를 라즈베리파이 한 대에 물렸습니다. 적외선 온도계는 I2C, NFC 리더는 SPI, 초음파 센서는 GPIO로 각각 다른 방식이라 핀이 겹치지 않게 배치해야 했습니다. 초음파 센서의 Echo 핀은 5V로 돌아오는데 라즈베리파이 GPIO는 3.3V까지만 견디므로, <strong>1kΩ·2kΩ 분압 저항</strong>을 넣어 전압을 낮춰 받았습니다.</span><span data-en>Three kinds of sensor on one Raspberry Pi: the infrared thermometer on I2C, the NFC reader on SPI, the ultrasonic sensor on plain GPIO — three different buses whose pins had to be laid out without collisions. The ultrasonic Echo pin returns 5 V while the Pi’s GPIO tolerates only 3.3 V, so a <strong>1 kΩ / 2 kΩ divider</strong> drops it before it reaches the board.</span></p>
+        <figure class="diagram inline">
+          <a href="/assets/img/kiosk-circuit.png" rel="noreferrer"><img src="/assets/img/kiosk-circuit.png" width="1400" height="787" loading="lazy" decoding="async"
+               alt="라즈베리파이 40핀 헤더에 적외선 온도센서(I2C), 초음파 센서(GPIO, 분압 저항 경유), RFID 리더(SPI)를 연결한 회로도"></a>
+          <figcaption><span data-ko>직접 그린 회로도. 초음파 센서 Echo 는 분압 저항을 거쳐 GPIO 로 들어갑니다. (그림을 누르면 원본 크기)</span><span data-en>The circuit as I drew it. The ultrasonic Echo line passes through the divider before reaching GPIO. (click for full size)</span></figcaption>
+        </figure>
+        <p class="small muted"><span data-ko>서버는 Express REST API로 단말 요청을 받고, 구성원별·일자별 체온을 ejs로 시각화했습니다.</span><span data-en>The server takes the kiosk’s requests over an Express REST API and renders temperatures per person and per day with ejs.</span></p>
+        <p class="small">
+          <a class="more" href="https://github.com/poby123/ssuCoronaProject" rel="noreferrer"><span data-ko>서버 저장소 →</span><span data-en>Server repo →</span></a>
+          &nbsp;&nbsp;
+          <a class="more" href="https://github.com/poby123/ssuCoronaProject_Client" rel="noreferrer"><span data-ko>단말 저장소 →</span><span data-en>Kiosk repo →</span></a>
+        </p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ── 연락 ──────────────────────────────────────────────── -->
+<section id="contact">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2><span data-ko>연락</span><span data-en>Get in touch</span></h2>
+      <p>
+        <span data-ko>제로콜의 전화 시스템은 <strong>SIP와 교환기, 통신사 회선 규격을 표준 문서부터 읽어 가며</strong> 설계했고, <strong>열 달 뒤 지점이 여럿인 학원 현장에서 운영에 들어갔습니다.</strong></span>
+        <span data-en>ZeroCall’s telephony stack was designed <strong>from the standards up — SIP, the exchange, the carrier’s line specifications</strong> — and <strong>ten months later it went into production across a multi-branch academy.</strong></span>
+      </p>
+      <p>
+        <span data-ko>새로운 도메인을 맡으면 표준 문서부터 읽고, 가장 작은 단위를 실제로 동작시켜 본 뒤 로그로 확인하며 범위를 넓힙니다. 지금 알고 있는 기술의 목록보다, <strong>필요한 것을 익혀 제품 수준까지 구현해 온 이력</strong>을 더 믿어 주셔도 좋습니다.</span>
+        <span data-en>Given a new domain, I start from the standards, get the smallest unit actually running, confirm it in the logs, and widen from there. Rather than the list of what I know today, <strong>the better signal is a record of learning what the work required and taking it to production.</strong></span>
+      </p>
+      <p>
+        <span data-ko>제가 오래 붙잡아 온 것은 백엔드의 기본입니다 — <strong>동시에 들어오는 요청을 어긋나지 않게 처리하는 일, 데이터가 조용히 틀리지 않게 지키는 일, 느려진 원인을 재현해 줄이는 일.</strong> 전화와 실시간 미디어를 오래 다룬 것도 그 기본이 가장 빡빡하게 요구되는 자리였기 때문입니다.</span>
+        <span data-en>What I have spent the most time on is the backend fundamentals — <strong>keeping concurrent requests from stepping on each other, keeping data from going quietly wrong, and reproducing whatever made something slow before reducing it.</strong> I have worked on telephony and realtime media for as long as I have because that is where those demands are tightest.</span>
+      </p>
+      <p>
+        <a href="mailto:i2pir@naver.com">i2pir@naver.com</a> &nbsp;·&nbsp;
+        <a href="https://github.com/poby123" rel="noreferrer">github.com/poby123</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-ko>이원주 · 소프트웨어 엔지니어</span><span data-en>Wonju Lee · Software Engineer</span>
+    <span class="mono">2026</span>
+  </div>
+</footer>
+
 </body>
-
 </html>

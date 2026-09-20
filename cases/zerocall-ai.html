@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko" data-lang="ko" data-title-en="An AI that answers, and the devices that ring — Wonju Lee">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전화를 받는 AI, 그리고 그 전화가 울리는 곳 — 이원주</title>
+<meta name="description" content="실시간 음성 모델을 통화 미디어에 직접 물린 AI 응대 하네스, 3채널 녹음과 전사·요약, 그리고 앱·PC·데스크폰 세 곳에서 같은 전화를 받게 만든 이야기.">
+<meta property="og:title" content="전화를 받는 AI, 그리고 그 전화가 울리는 곳 — 이원주">
+<meta property="og:description" content="실시간 음성 모델을 통화 미디어에 직접 물린 AI 응대 하네스, 3채널 녹음과 전사·요약, 그리고 앱·PC·데스크폰 세 곳에서 같은 전화를 받게 만든 이야기.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('wonju.lang')||'ko';document.documentElement.dataset.lang=l;document.documentElement.lang=l;}catch(e){}document.documentElement.className='anim';</script>
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><span data-ko>이원주 <i>· 소프트웨어 엔지니어</i></span><span data-en>Wonju Lee <i>· Software Engineer</i></span></a>
+    <nav>
+      <a href="/#cases" class="hide-sm"><span data-ko>케이스 스터디</span><span data-en>Case studies</span></a>
+      <a href="/#contact"><span data-ko>연락</span><span data-en>Contact</span></a>
+      <span class="langswitch">
+        <button type="button" data-set-lang="ko" aria-pressed="true">KO</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<div class="case-hero">
+  <p class="kicker"><a href="/">←</a> &nbsp;<span data-ko>케이스 스터디 · 제로콜 AI 응대와 단말</span><span data-en>Case study · ZeroCall AI answering and devices</span></p>
+  <h1><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></h1>
+  <p class="lead"><span data-ko>채팅은 사용자가 기다려 줍니다. <strong>전화는 0.5초만 비어도 되묻고, 1초가 넘으면 끊습니다.</strong></span><span data-en>In chat the user waits. <strong>On a call, half a second of silence gets a "hello?" and a full second gets a hang-up.</strong></span></p>
+  <dl class="specsheet">
+    <div><dt><span data-ko>기간</span><span data-en>Period</span></dt><dd>2025.11 – <span data-ko>현재</span><span data-en>present</span></dd></div>
+    <div><dt><span data-ko>역할</span><span data-en>Role</span></dt><dd><span data-ko>설계 · 구현 · 개인정보 기준 문서</span><span data-en>Design, implementation, privacy documentation</span></dd></div>
+    <div><dt><span data-ko>스택</span><span data-en>Stack</span></dt><dd><span class="mono">OpenAI Realtime · Gemini Live · Asterisk ExternalMedia · React Native · Kotlin · Swift · Electron</span></dd></div>
+    <div><dt><span data-ko>결과</span><span data-en>Outcome</span></dt><dd><span data-ko>업종 에이전트 10종 · 푸시→연결 100ms</span><span data-en>10+ industry agents · 100 ms push-to-connect</span></dd></div>
+  </dl>
+
+  <div class="context">
+    <h2><span data-ko>배경</span><span data-en>Background</span></h2>
+    <p><span data-ko>제로콜은 070 전화에 AI 응대를 붙인 서비스입니다. 세탁소·스터디카페·학원처럼 <strong>업종이 제각각인 곳들이 씁니다.</strong></span><span data-en>ZeroCall adds an AI agent to a 070 line. It is used by laundries, study cafés and academies — <strong>businesses with nothing in common.</strong></span></p>
+    <p><span data-ko>AI가 먼저 받고, 처리하지 못하면 사람에게 넘어갑니다. 그 사람은 휴대폰·PC·책상 위 전화기 중 하나를 쓰고 있습니다.</span><span data-en>The AI answers first and hands over when it cannot finish. That person is on a phone, a PC, or the handset on their desk.</span></p>
+  </div>
+  <div class="summary">
+    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
+    <ul>
+      <li><span data-ko>채팅과 달리 전화는 기다려 주지 않습니다. 그래서 배치가 아니라 <strong>통화 미디어에 직접 물리는 실시간 경로</strong>여야 했습니다.</span><span data-en>Unlike chat, a phone call does not wait. So it had to be a <strong>realtime path sitting on the call’s own media</strong>, not a batch job.</span></li>
+      <li><span data-ko>업종마다 도구가 달라야 해서, 에이전트를 <strong>빌더로 조립</strong>합니다. 지금 10종이 한 인터페이스 위에 있습니다.</span><span data-en>Each industry needs different tools, so agents are <strong>assembled by a builder</strong> — ten of them on one interface.</span></li>
+      <li><span data-ko>화자 분리는 모델이 아니라 <strong>교환기가</strong> 합니다. 통화 1건에 파일 3개.</span><span data-en>Speaker separation is done by <strong>the PBX</strong>, not the model — three files per call.</span></li>
+      <li><span data-ko>AI가 받지 않는 전화는 <strong>대기열을 거쳐</strong> 앱·PC·데스크폰 중 예측 가능한 한 곳에서 울립니다.</span><span data-en>What the AI does not take goes <strong>through the queue</strong> and rings in exactly one predictable place out of three.</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<section class="block">
+  <h2><span data-ko>전화를 AI가 받는다는 것</span><span data-en>What it means for an AI to answer</span></h2>
+  <p><span data-ko>채팅은 사용자가 기다려 줍니다. 전화는 기다려 주지 않습니다. 0.5초만 비어도 사람은 "여보세요?"라고 되묻고, 1초가 넘으면 끊습니다. 그래서 AI 응대는 녹음을 받아 처리하는 배치가 아니라, 통화 미디어에 직접 물리는 실시간 경로여야 했습니다.</span><span data-en>In chat the user waits. On a phone call they do not. Half a second of silence and a person says "hello?"; more than a second and they hang up. So AI answering could not be a batch job over a recording — it had to sit directly on the call’s media.</span></p>
+  <figure class="diagram">
+    <svg viewBox="0 0 900 208" role="img" aria-label="Call audio flows from Asterisk through call-handler into a realtime voice model and back">
+      <defs>
+        <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="var(--path)"/>
+        </marker>
+      </defs>
+      <rect class="d-box" x="24" y="66" width="128" height="52" rx="3"/>
+      <text class="d-t" x="88" y="88" text-anchor="middle"><tspan data-ko>고객</tspan><tspan data-en>Caller</tspan></text>
+      <text class="d-s" x="88" y="105" text-anchor="middle">G.711 · 8 kHz</text>
+
+      <path class="d-line" d="M152,92 H208" marker-end="url(#m1)" marker-start="url(#m1)"/>
+
+      <rect class="d-box" x="210" y="56" width="140" height="72" rx="3"/>
+      <text class="d-t" x="280" y="80" text-anchor="middle">Asterisk</text>
+      <text class="d-s" x="280" y="97" text-anchor="middle">ExternalMedia</text>
+      <text class="d-s" x="280" y="112" text-anchor="middle">RTP</text>
+
+      <path class="d-line" d="M350,92 H408" marker-end="url(#m1)" marker-start="url(#m1)"/>
+
+      <rect class="d-box" x="410" y="40" width="180" height="104" rx="3"/>
+      <text class="d-t" x="500" y="64" text-anchor="middle">call-handler</text>
+      <text class="d-s" x="500" y="83" text-anchor="middle"><tspan data-ko>리샘플링 8k ↔ 24k</tspan><tspan data-en>resample 8k ↔ 24k</tspan></text>
+      <text class="d-s" x="500" y="100" text-anchor="middle"><tspan data-ko>업종별 에이전트 · 도구</tspan><tspan data-en>per-industry agent · tools</tspan></text>
+      <text class="d-s" x="500" y="117" text-anchor="middle"><tspan data-ko>사람에게 넘기기</tspan><tspan data-en>hand off to a human</tspan></text>
+      <text class="d-s" x="500" y="134" text-anchor="middle"><tspan data-ko>DTMF 수집</tspan><tspan data-en>DTMF capture</tspan></text>
+
+      <path class="d-line" d="M590,92 H648" marker-end="url(#m1)" marker-start="url(#m1)"/>
+
+      <rect class="d-box" x="650" y="56" width="226" height="72" rx="3"/>
+      <text class="d-t" x="763" y="80" text-anchor="middle"><tspan data-ko>실시간 음성 모델</tspan><tspan data-en>Realtime voice model</tspan></text>
+      <text class="d-s" x="763" y="98" text-anchor="middle">OpenAI Realtime</text>
+      <text class="d-s" x="763" y="114" text-anchor="middle">Gemini Live</text>
+
+      <path class="d-line" d="M280,128 V168" marker-end="url(#m1)"/>
+      <rect class="d-box2" x="186" y="170" width="188" height="30" rx="3"/>
+      <text class="d-s" x="280" y="190" text-anchor="middle"><tspan data-ko>녹음 3채널 → STT → 요약</tspan><tspan data-en>3-channel recording → STT → summary</tspan></text>
+    </svg>
+    <figcaption><span data-ko>Asterisk의 ExternalMedia로 통화 오디오를 call-handler가 직접 받고, 리샘플링해 모델에 흘립니다. 같은 통화가 동시에 녹음되어 종료 후 전사·요약 경로로 넘어갑니다.</span><span data-en>Asterisk hands the call’s audio to call-handler over ExternalMedia; it resamples and streams into the model. The same call is recorded in parallel and goes down the transcription and summary path after it ends.</span></figcaption>
+  </figure>
+
+  <h3><span data-ko>업종마다 다른 응대를 한 구조로</span><span data-en>One harness, many kinds of business</span></h3>
+  <p><span data-ko>세탁소에 걸려 오는 전화와 스터디카페에 걸려 오는 전화는 다릅니다. 세탁소는 "제 옷 다 됐나요"를 묻고, 스터디카페는 자리를 예약하거나 환불을 요청하고, 학원은 상담 문의를 받습니다. <strong>프롬프트만 바꿔서는 안 되고, 부를 수 있는 도구 자체가 달라야 합니다.</strong></span><span data-en>A call to a laundry is not a call to a study café. The laundry gets "is my shirt ready"; the café books a seat or asks for a refund; the academy takes admissions enquiries. <strong>Swapping the prompt is not enough — the tools the agent can call have to differ.</strong></span></p>
+  <p><span data-ko>그래서 그룹의 업종에 따라 에이전트를 조립하는 빌더 구조로 만들었습니다. 각 빌더가 자기 프롬프트와 도구 묶음을 들고 있고, 공통 도구는 하네스가 끼워 넣습니다.</span><span data-en>So agents are assembled by a builder keyed on the group’s industry: each builder carries its own prompt and tool set, and the harness injects the shared ones.</span></p>
+  <ul class="bullets">
+    <li><span data-ko>지금 10개 넘는 업종 에이전트가 같은 인터페이스 위에 올라가 있고, <strong>새 업종을 붙이는 일은 빌더 하나를 추가하는 일</strong>이 됐습니다.</span><span data-en>More than ten industry agents now sit on the same interface, and <strong>adding a new one means adding a builder.</strong></span></li>
+    <li><span data-ko><strong>사람에게 넘기기</strong>는 대화 중 어느 시점에나 가능합니다. 통화를 끊지 않고 대기열로 넣기 때문에, 고객에게는 안내가 끝나고 상담원이 받는 것처럼 들립니다.</span><span data-en><strong>Handing off to a person</strong> can happen at any point. The call moves into the queue without dropping, so to the caller it sounds like the greeting ended and someone picked up.</span></li>
+    <li><span data-ko><strong>번호 입력(DTMF)</strong>은 모델이 아니라 하네스가 받습니다. 음성으로 카드번호를 듣게 두는 것보다 정확하고, 기록에 남기지 않을 값을 통제할 수 있습니다.</span><span data-en><strong>Keypad input</strong> is captured by the harness, not the model — more accurate than having it hear a card number aloud, and it keeps values that must not be logged out of the transcript.</span></li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span data-ko>통화가 끝난 뒤에 남는 것</span><span data-en>What the call leaves behind</span></h2>
+  <p><span data-ko>상담원이 받은 통화도 기록이 필요합니다. 다시 듣지 않고도 무슨 이야기가 오갔는지 알 수 있어야 합니다. 녹음 → 전사 → 요약이 그 경로인데, 설계에서 아낀 부분이 하나 있습니다 — <strong>화자 분리를 모델에 맡기지 않은 것</strong>입니다.</span><span data-en>Calls answered by people need records too — you should know what was said without listening again. Recording → transcription → summary is that path, and one design choice saved a lot of work: <strong>speaker separation is not the model’s job here.</strong></span></p>
+  <p><span data-ko>통화 1건에 파일 3개를 만듭니다. 고객 음성만, 담당자 음성만, 그리고 둘을 섞은 것. 교환기 단계에서 이미 오디오가 물리적으로 분리돼 있으므로 추론시킬 이유가 없고, 전사 결과가 처음부터 대화 형식으로 나옵니다.</span><span data-en>Each call produces three files: caller only, agent only, and the mix. The two voices are already physically separate at the PBX, so nothing has to be inferred and the transcript comes out as a dialogue from the start.</span></p>
+  <p><span data-ko>회선이 G.711 μ-law 8kHz 단일 코덱이라 녹음에서 업샘플링하지 않고, 전사도 같은 8kHz로 넘깁니다 — <strong>있지도 않은 대역을 만들어 봐야 정확도가 오르지 않습니다.</strong></span><span data-en>The line is G.711 μ-law at 8 kHz end to end, so nothing is upsampled — <strong>inventing bandwidth that was never there does not improve accuracy.</strong></span></p>
+  <table>
+    <thead><tr><th><span data-ko>기능</span><span data-en>Function</span></th><th><span data-ko>처리 시점</span><span data-en>When</span></th><th><span data-ko>경로</span><span data-en>Path</span></th></tr></thead>
+    <tbody>
+      <tr><td><span data-ko>음성인식 (STT)</span><span data-en>Transcription</span></td><td><span data-ko>통화 종료 후 배치 (약 3분 주기)</span><span data-en>batch after the call, ~3 min</span></td><td><span data-ko>온프레미스 · 클라우드 분산</span><span data-en>on-prem and cloud</span></td></tr>
+      <tr><td><span data-ko>요약</span><span data-en>Summary</span></td><td><span data-ko>전사 완료 후 배치</span><span data-en>batch after transcription</span></td><td><span data-ko>온프레미스 · 클라우드 분산</span><span data-en>on-prem and cloud</span></td></tr>
+      <tr><td><span data-ko>실시간 응대</span><span data-en>Realtime answering</span></td><td><span data-ko>통화 중</span><span data-en>during the call</span></td><td><span data-ko>클라우드 전용 (지연 요건)</span><span data-en>cloud only — latency</span></td></tr>
+    </tbody>
+  </table>
+  <p><span data-ko>요약에는 통화 전문만 넣지 않습니다. 발신번호, 그 고객의 이전 상담 이력, 앞선 요약을 함께 넣습니다. 한 통화만 보면 "환불 문의"지만, 이력을 보면 "세 번째 환불 문의"입니다.</span><span data-en>The summariser does not see only the transcript. It gets the caller’s number, their earlier consultation history and previous summaries. Read alone, a call is "a refund enquiry"; read with history, it is "the third refund enquiry".</span></p>
+
+  <h3><span data-ko>녹음을 다루는 일은 대부분 통제의 문제였다</span><span data-en>Handling recordings is mostly about control</span></h3>
+  <p><span data-ko>통화 녹음과 전문에는 개인정보가 그대로 들어 있습니다. 학원 도입을 준비하면서 이 부분을 기능이 아니라 기준으로 다뤘고, 명세서와 대응 문서를 직접 써서 고객사 보안 검토를 통과시켰습니다.</span><span data-en>Recordings and transcripts contain personal data as-is. Preparing the academy rollout I treated this as a standard to meet rather than a feature to add, and wrote the specification and compliance documents that carried it through the customer’s security review.</span></p>
+  <ul class="bullets">
+    <li><span data-ko>재생과 전문 열람은 <strong>요청해야 보입니다.</strong> 목록에 자동으로 펼쳐 두지 않고, 열 때마다 개인정보 포함 사실을 고지하며, 누가 언제 무엇을 열었는지 접속기록에 남깁니다.</span><span data-en>Playback and transcripts are <strong>shown only on request</strong> — never expanded by default, each access states that personal data is included, and every read is logged with who, when and what.</span></li>
+    <li><span data-ko>녹음은 브라우저 재생만 가능하고 다운로드는 모든 역할에서 막습니다. 전문은 화면에서 선택·복사를 막습니다.</span><span data-en>Recordings play in the browser only; download is blocked for every role. Transcripts cannot be selected or copied on screen.</span></li>
+    <li><span data-ko>전문은 레코드별 IV로 AES-256 암호화해 저장하고, 녹음 파일은 S3 서버측 암호화(SSE-KMS)로 둡니다.</span><span data-en>Transcripts are AES-256 encrypted with a per-record IV; recordings sit in S3 under SSE-KMS.</span></li>
+    <li><span data-ko>보유기간은 통화 월 말 기준 12개월이고 만료되면 자동 파기됩니다. 연장은 본사가 통화 월 단위로 결정합니다.</span><span data-en>Retention is twelve months from the end of the call’s month, then automatic destruction. Head office can extend, month by month.</span></li>
+  </ul>
+</section>
+
+<section class="block" id="queue">
+  <h3><span data-ko>상담원이 놀고 있는데 대기자가 줄지 않았다</span><span data-en>Agents idle, queue not moving</span></h3>
+  <p><span data-ko>분배를 시험하다가 <strong>배정이 느리다</strong>는 것을 발견했습니다. 분배 루프가 한 그룹당 한 명씩 <strong>직렬로</strong> 돌고 있었습니다 — 앞사람이 받아야 다음 사람 배정이 시작됩니다.</span><span data-en>While exercising distribution I found <strong>assignment was slow</strong>. The loop rang members <strong>one at a time</strong> per group — the next only began once the previous ring resolved.</span></p>
+  <p><span data-ko>상담원 여섯 명이 전원 대기 중인데도, 한 명씩 5~10초를 기다리느라 소진에 30~60초가 걸렸습니다.</span><span data-en>With six agents all idle, each ring costing 5–10 seconds, draining the queue still took 30–60 seconds.</span></p>
+  <blockquote><p><span data-ko><strong>서버를 늘려도 이 문제는 그대로입니다.</strong> 한 그룹의 분배는 어차피 한 곳에서 돌기 때문입니다. 처리량 문제로 보이지만 실은 배정 순서 문제였고, 고칠 곳은 증설이 아니라 분배 루프였습니다.</span><span data-en><strong>More machines would not have helped.</strong> A group’s distribution runs in one place regardless. It looked like throughput and was really ordering — the fix was in the loop, not the fleet.</span></p></blockquote>
+  <h2><span data-ko>AI가 받지 않으면 대기열로 간다</span><span data-en>What the AI does not take goes to the queue</span></h2>
+  <p><span data-ko>Asterisk에는 내장 큐가 있습니다. 쓰지 않았습니다. 멤버가 항상 등록돼 있다고 전제하는데, 상담원 절반은 휴대폰이고 iOS가 앱을 정리하면 등록이 사라집니다. <strong>푸시로 깨운 다음에야 호출할 수 있습니다.</strong></span><span data-en>Asterisk ships a queue. I did not use it: it assumes members stay registered, but half our agents are on phones and iOS reclaims the app. <strong>You have to wake the device by push before you can ring it.</strong></span></p>
+  <p><span data-ko>그래서 발신자를 홀딩 브릿지에 붙잡고 분배는 Node에서 돌립니다. 기존 푸시 웨이크업을 그대로 흡수했고, 전환이 "채널을 다른 브릿지로 옮기기"가 되었으며, 대기·응답·전환 이벤트를 직접 발생시키니 <strong>현황 화면과 통계가 부산물로 생겼습니다.</strong></span><span data-en>Instead the caller is held on a bridge and distribution runs in Node. It absorbed the existing push-wake logic, turned transfer into "move the channel", and because it emits its own events, <strong>the live dashboard and statistics fell out for free.</strong></span></p>
+  <ul class="bullets">
+    <li><span data-ko><strong>분배 전략은 그룹이 고릅니다</strong> — 전원 동시 호출, 또는 가장 오래 쉰 사람부터.</span><span data-en><strong>Each group picks its strategy</strong> — ring all, or longest idle first.</span></li>
+    <li><span data-ko>무응답 15초·통화중·수신거절·웨이크업 실패를 모두 실패로 보고 다음 사람에게 넘깁니다. 전원 실패면 20초 뒤 다음 라운드입니다.</span><span data-en>No answer after 15 s, busy, rejected and failed wake-up all count as failure and move on. If everyone fails, the next round starts 20 s later.</span></li>
+    <li><span data-ko>대가는 분명합니다 — call-handler가 통화의 단일 장애점이 됩니다. 그래서 큐 상태는 Redis에 둡니다.</span><span data-en>The cost is explicit: call-handler becomes a single point of failure for calls in flight, so queue state lives in Redis.</span></li>
+  </ul>
+
+  <h3><span data-ko>다이얼플랜에는 ARS 로직이 없다</span><span data-en>The dialplan contains no IVR logic</span></h3>
+  <p><span data-ko>사용자가 구성하는 ARS 흐름은 전부 Node가 해석합니다. 다이얼플랜이 하는 일은 두 가지뿐입니다 — 이 번호에 흐름이 붙어 있는지 보고 넘기기, 그리고 돌아온 결과대로 연결하기.</span><span data-en>The user-configured IVR is interpreted entirely in Node. The dialplan does two things: check whether this number has a flow, and dial according to the result that comes back.</span></p>
+  <p><span data-ko>덕분에 다이얼플랜에 실제로 추가된 곳은 세 군데뿐입니다. 흐름을 바꿀 때 교환기 설정이 아니라 데이터베이스만 건드리면 되고, <strong>그래서 사용자가 화면에서 직접 ARS를 고칠 수 있습니다.</strong></span><span data-en>Only three places in the dialplan changed at all. Editing a flow touches the database, not the PBX config — <strong>which is what lets users edit their own IVR from the web.</strong></span></p>
+</section>
+
+<section class="block">
+  <h2><span data-ko>그 전화가 울리는 곳</span><span data-en>Where that call actually rings</span></h2>
+  <p><span data-ko>AI가 받지 않는 전화는 사람에게 갑니다. 그 사람은 휴대폰을 쓰거나, PC 앱을 쓰거나, 책상에 이미 놓인 데스크폰을 씁니다. 세 곳에서 같은 전화를 받게 만드는 일이 생각보다 어려웠습니다.</span><span data-en>A call the AI does not take goes to a person — who is on a phone, or a PC app, or the desk handset that was already there. Making one call ring in three places was harder than it sounds.</span></p>
+
+  <h3><span data-ko>앱이 꺼져 있어도 울려야 한다</span><span data-en>It has to ring when the app is not running</span></h3>
+  <p><span data-ko>iOS와 Android는 백그라운드 앱을 언제든 정리합니다. 앱이 죽으면 WebSocket이 끊기고 SIP 등록이 사라지므로, <strong>푸시로 깨워 다시 등록시킨 뒤에야</strong> 통화 요청을 보낼 수 있습니다.</span><span data-en>Both iOS and Android reclaim background apps whenever they like. When the app dies the WebSocket closes and the SIP registration is gone, so an incoming call <strong>must wake the device by push and re-register</strong> before the INVITE can be delivered.</span></p>
+  <p><span data-ko>처음 구현은 React Native의 Headless JS에서 SIP를 붙였고 <strong>약 4초</strong>가 걸렸습니다. 전화는 6초 안에 못 받으면 놓친 전화가 됩니다. <strong>4초는 예산 전부입니다.</strong></span><span data-en>The first implementation connected SIP from React Native’s Headless JS and took <strong>about four seconds</strong>. A call is missed if it is not answered within six. <strong>Four seconds was the whole budget.</strong></span></p>
+  <table>
+    <thead><tr><th></th><th>Headless JS</th><th><span data-ko>네이티브 SIP</span><span data-en>Native SIP</span></th></tr></thead>
+    <tbody>
+      <tr><td><span data-ko>푸시 → SIP 연결</span><span data-en>Push → SIP connected</span></td><td><span data-ko>약 4초</span><span data-en>~4 s</span></td><td><span data-ko>약 100ms</span><span data-en>~100 ms</span></td></tr>
+      <tr><td><span data-ko>JS 런타임 의존</span><span data-en>Depends on the JS runtime</span></td><td><span data-ko>있음</span><span data-en>yes</span></td><td><span data-ko>없음</span><span data-en>no</span></td></tr>
+      <tr><td><span data-ko>수신 UI</span><span data-en>Incoming call UI</span></td><td><span data-ko>앱 화면</span><span data-en>in-app screen</span></td><td>CallKit · ConnectionService</td></tr>
+    </tbody>
+  </table>
+  <p><span data-ko>시그널링과 미디어를 네이티브로 내렸습니다. Android는 Kotlin에 OkHttp WebSocket과 WebRTC, iOS는 Swift에 같은 구성입니다.</span><span data-en>Signalling and media moved down to native — Kotlin with an OkHttp WebSocket and WebRTC on Android, the same shape in Swift on iOS.</span></p>
+
+  <h3><span data-ko>죽은 소켓을 알아차리는 일</span><span data-en>Noticing a socket that has already died</span></h3>
+  <p><span data-ko>운영하면서 가장 오래 붙잡고 있던 문제입니다. WebSocket은 조용히 죽습니다. FIN 없이 끊기면 앱은 자기가 아직 연결돼 있다고 믿고, 서버는 등록이 남아 있으니 그쪽으로 전화를 보냅니다. 양쪽 다 정상이라고 생각하는데 전화만 연결되지 않습니다.</span><span data-en>This took the longest to pin down. A WebSocket dies quietly. Without a FIN the app still believes it is connected and the server still has a registration to dial. Both sides think everything is fine and only the call fails.</span></p>
+  <p><span data-ko>발신 경로에는 이미 방어가 있었는데, 로그를 뒤져 보니 <strong>iOS 수신 경로만 그 방어가 없었습니다.</strong> 이제 푸시를 받으면 800밀리초짜리 헬스체크를 던지고, 실패하면 강제로 다시 붙습니다.</span><span data-en>The outbound path already defended itself; the logs showed that <strong>only the iOS inbound path did not.</strong> Now a push triggers an 800 ms health check and forces a reconnect when it fails.</span></p>
+  <p><span data-ko>다만 두 경우에는 그대로 둡니다 — 이미 INVITE가 도착했으면 소켓이 살아 있다는 증거이고, 통화 중이면 그 통화의 시그널링 소켓입니다. <strong>안전해 보이는 재연결이 멀쩡한 통화를 끊는 일이 더 나쁩니다.</strong></span><span data-en>Two cases are left alone: if the INVITE has already arrived the socket is provably alive, and if a call is active that socket is carrying it. <strong>A reconnect that looks safe but drops a live call is the worse outcome.</strong></span></p>
+
+  <h3><span data-ko>상담 자리에는 전화기가 이미 있다</span><span data-en>At a consultation desk there is already a phone</span></h3>
+  <p><span data-ko>학원 상담 자리에는 데스크폰이 이미 놓여 있습니다. 거기에 PC 앱을 하나 더 두면 전화를 어디서 받을지가 모호해집니다. 그래서 모드를 <strong>사용자가 고르게</strong> 하고 둘을 섞지 않았습니다. 섞으면 "내 전화가 어디서 울리는지"를 예측할 수 없고, 예측할 수 없으면 전화를 놓칩니다.</span><span data-en>A consultation desk already has a handset on it. Add a PC app and it becomes unclear where a call will ring. So the mode is <strong>the user’s choice</strong> and the two never blend — blended, you cannot predict where your phone rings; unpredictable, you miss calls.</span></p>
+  <table>
+    <thead><tr><th></th><th><span data-ko>소프트폰 (이 PC)</span><span data-en>Softphone (this PC)</span></th><th><span data-ko>연동 (데스크폰)</span><span data-en>Linked (desk phone)</span></th></tr></thead>
+    <tbody>
+      <tr><td><span data-ko>수신</span><span data-en>Receiving</span></td><td><span data-ko>PC에서 받고 끊습니다</span><span data-en>answer and hang up on the PC</span></td><td><span data-ko>데스크폰이 울리고 PC는 발신자 정보를 띄웁니다</span><span data-en>the handset rings; the PC shows who is calling</span></td></tr>
+      <tr><td><span data-ko>발신</span><span data-en>Dialling</span></td><td>WebRTC</td><td><span data-ko>서버가 데스크폰을 먼저 울립니다 (CTI)</span><span data-en>the server rings your handset first (CTI)</span></td></tr>
+      <tr><td><span data-ko>SIP 등록</span><span data-en>SIP registration</span></td><td><span data-ko>유지</span><span data-en>kept</span></td><td><span data-ko>하지 않음</span><span data-en>none</span></td></tr>
+    </tbody>
+  </table>
+  <blockquote><p><span data-ko>구현에서 마음에 드는 부분은 <strong>서버가 모드를 알 필요가 없다</strong>는 점입니다. 다이얼플랜은 등록이 있을 때만 PC 쪽 통화 경로를 만들기 때문에, 연동 모드에서 등록을 내리면 PC는 자동으로 울리지 않습니다. 모드는 곧 등록 여부이고, 별도의 상태를 서버에 둘 이유가 없었습니다.</span><span data-en>The part I like is that <strong>the server does not need to know the mode.</strong> The dialplan only creates a PC leg when a registration exists, so unregistering in linked mode is what stops the PC ringing. The mode <em>is</em> the registration — no extra server-side state required.</span></p></blockquote>
+  <p><span data-ko>이 앱은 고객사 상담원 PC에 <strong>설치되어</strong> 돌아갑니다. 웹이면 잘못 나가도 되돌리면 그만이지만, 설치본은 재배포와 사용자의 재설치가 필요합니다.</span><span data-en>This app is <strong>installed</strong> on customers’ machines. On the web a bad release is reverted; an installed build needs a re-release and a user willing to reinstall.</span></p>
+  <p><span data-ko>그래서 저장소에 변경 정책을 적어 두고 스스로 지킵니다 — 요청받은 것만 고치고, 버전·서명·빌드 설정은 지시 없이 건드리지 않습니다. 게시자 이름이 바뀌면 윈도우가 다른 프로그램으로 취급해, <strong>무해해 보이는 한 줄이 현장에서는 "업데이트가 안 된다"로 나타납니다.</strong></span><span data-en>So the repository carries a change policy I hold myself to: fix only what was asked, and never change version, signing or build settings unasked. Change the publisher name and Windows treats it as a different program — <strong>a line that looks harmless shows up on site as "the update does not install".</strong></span></p>
+</section>
+
+<section class="block">
+  <h2><span data-ko>지금</span><span data-en>Where it stands</span></h2>
+  <div class="outcome">
+    <ul>
+      <li><span data-ko>10개 넘는 업종 에이전트가 하나의 하네스 위에서 돌고, 새 업종은 빌더 하나를 추가하면 붙습니다.</span><span data-en>More than ten industry agents run on one harness; a new industry is one more builder.</span></li>
+      <li><span data-ko>모든 통화가 3채널로 녹음되고, 3분 주기 배치로 전사와 요약이 붙습니다. 암호화·열람 통제·접속기록·12개월 자동 파기까지 포함해 고객사 보안 검토를 통과했습니다.</span><span data-en>Every call is recorded on three channels and transcribed and summarised within about three minutes. Encryption, access control, audit logging and twelve-month destruction cleared the customer’s security review.</span></li>
+      <li><span data-ko>모바일 앱은 푸시 수신부터 SIP 연결까지 약 100ms. 앱이 종료된 상태에서도 전화를 받습니다. PC 에이전트는 고객사 상담 자리에서 데스크폰과 나란히 돌고 있습니다.</span><span data-en>The mobile app connects SIP about 100 ms after the push and answers even when it was not running. The desktop agent runs at customer desks alongside the existing handsets.</span></li>
+    </ul>
+  </div>
+</section>
+
+
+<div class="casenav">
+  <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
+  <a href="/cases/infra.html"><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></a>
+  <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
+  <a href="/cases/silent-failures.html"><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></a>
+</div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-ko>이원주 · 소프트웨어 엔지니어</span><span data-en>Wonju Lee · Software Engineer</span>
+    <span class="mono">2026</span>
+  </div>
+</footer>
+
+</body>
+</html>

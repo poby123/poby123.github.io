@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko" data-lang="ko" data-title-en="Making the phone system redundant without changing an address — Wonju Lee">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주소를 바꾸지 않고 전화 인프라를 이중화하기 — 이원주</title>
+<meta name="description" content="단일 Asterisk를 Kamailio + rtpengine 앞단과 Asterisk 여러 대로 전환한 과정. 포트 승계, 통화 소유권 모델, 해시 선택, 현장 교환기 연동.">
+<meta property="og:title" content="주소를 바꾸지 않고 전화 인프라를 이중화하기 — 이원주">
+<meta property="og:description" content="단일 Asterisk를 Kamailio + rtpengine 앞단과 Asterisk 여러 대로 전환한 과정. 포트 승계, 통화 소유권 모델, 해시 선택, 현장 교환기 연동.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('wonju.lang')||'ko';document.documentElement.dataset.lang=l;document.documentElement.lang=l;}catch(e){}document.documentElement.className='anim';</script>
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><span data-ko>이원주 <i>· 소프트웨어 엔지니어</i></span><span data-en>Wonju Lee <i>· Software Engineer</i></span></a>
+    <nav>
+      <a href="/#cases" class="hide-sm"><span data-ko>케이스 스터디</span><span data-en>Case studies</span></a>
+      <a href="/#contact"><span data-ko>연락</span><span data-en>Contact</span></a>
+      <span class="langswitch">
+        <button type="button" data-set-lang="ko" aria-pressed="true">KO</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<div class="case-hero">
+  <p class="kicker"><a href="/">←</a> &nbsp;<span data-ko>케이스 스터디 · 제로콜 전화 인프라</span><span data-en>Case study · ZeroCall telephony</span></p>
+  <h1><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></h1>
+  <p class="lead"><span data-ko>한 대를 여러 대로 늘리되, <strong>통신사에 전화 한 통 하지 않고 현장 전화기 한 대 만지지 않는 것</strong>이 조건이었습니다.</span><span data-en>One machine had to become several — <strong>without calling the carrier once, or touching a single handset on site.</strong></span></p>
+  <dl class="specsheet">
+    <div><dt><span data-ko>기간</span><span data-en>Period</span></dt><dd>2026.07 – 2026.09</dd></div>
+    <div><dt><span data-ko>역할</span><span data-en>Role</span></dt><dd><span data-ko>설계 · 구현 · 전환 실행</span><span data-en>Design, implementation, cutover</span></dd></div>
+    <div><dt><span data-ko>스택</span><span data-en>Stack</span></dt><dd><span class="mono">Kamailio · rtpengine · Asterisk ARI · NestJS · Redis · SIPp</span></dd></div>
+    <div><dt><span data-ko>결과</span><span data-en>Outcome</span></dt><dd><span data-ko>무중단 전환 · 노드 5대</span><span data-en>Zero-downtime cutover, 5 nodes</span></dd></div>
+  </dl>
+
+  <div class="context">
+    <h2><span data-ko>배경</span><span data-en>Background</span></h2>
+    <p><span data-ko>제로콜은 070 번호로 전화와 문자를 주고받고, AI가 대신 응대하는 서비스입니다. 2025년 11월에 시작했으며, <strong>Asterisk를 올리고 다이얼플랜을 쓰고 call-handler를 ARI로 붙이는 초기 구성부터 맡았습니다.</strong></span><span data-en>ZeroCall is a 070 phone and messaging service with an AI that answers. It began in November 2025. <strong>I owned it from the initial build — standing up Asterisk, writing the dialplan, attaching the call-handler over ARI.</strong></span></p>
+    <p><span data-ko>오랫동안 <strong>Asterisk 한 대가 모든 통화를 받았습니다.</strong> 사용자가 수백 명일 때는 충분한 구조였지만, 지점이 여럿인 학원을 받기에는 이중화가 필요했습니다.</span><span data-en>For a long time <strong>one Asterisk answered every call.</strong> That was sound at a few hundred users, but taking on a multi-branch academy called for redundancy.</span></p>
+  </div>
+  <div class="summary">
+    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
+    <ul>
+      <li><span data-ko>단일 Asterisk가 급소였습니다. 앞에 <strong>Kamailio + rtpengine</strong>을 세우고 뒤를 여러 대로 늘렸습니다.</span><span data-en>A single Asterisk was the weak point. I put <strong>Kamailio + rtpengine</strong> in front and several nodes behind.</span></li>
+      <li><span data-ko>Kamailio가 Asterisk의 포트를 그대로 이어받아, <strong>바깥에서 보이는 주소가 하나도 바뀌지 않았습니다.</strong></span><span data-en>Kamailio inherited Asterisk’s ports, so <strong>nothing visible from outside changed.</strong></span></li>
+      <li><span data-ko>통화를 노드에 고정하는 대신 <strong>소유권 모델</strong>로 풀었습니다. 넣었던 고정은 하루 만에 제거했습니다.</span><span data-en>Instead of pinning calls to nodes I used an <strong>ownership model</strong> — the pinning I had added lasted one day.</span></li>
+      <li><span data-ko>현장에 이미 깔린 교환기 위에 서기 위해 <strong>VPN으로 붙고</strong>, SBC 역할은 이미 있는 것이 맡습니다.</span><span data-en>To sit on top of an exchange already in place, it <strong>connects over a VPN</strong> and reuses what we already run as the SBC.</span></li>
+    </ul>
+  </div>
+
+<figure class="trace">
+      <svg viewBox="0 0 920 306" role="img" aria-labelledby="trace-title">
+        <title id="trace-title">인입 전화 한 통이 지나는 경로 — the path a single inbound call travels</title>
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--path)"/>
+          </marker>
+          <marker id="as" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--signal)"/>
+          </marker>
+        </defs>
+
+        <!-- 레인 -->
+        <g>
+          <text class="d-h" x="58" y="14" text-anchor="middle"><tspan data-ko>고객</tspan><tspan data-en>Caller</tspan></text>
+          <text class="d-h" x="228" y="14" text-anchor="middle">KCT</text>
+          <text class="d-h" x="452" y="14" text-anchor="middle">Kamailio</text>
+          <text class="d-h" x="676" y="14" text-anchor="middle">Asterisk</text>
+          <text class="d-h" x="862" y="14" text-anchor="middle"><tspan data-ko>상담원</tspan><tspan data-en>Agent</tspan></text>
+          <text class="d-s" x="228" y="29" text-anchor="middle"><tspan data-ko>통신사</tspan><tspan data-en>carrier</tspan></text>
+          <text class="d-s" x="452" y="29" text-anchor="middle">+ rtpengine</text>
+          <text class="d-s" x="676" y="29" text-anchor="middle">+ call-handler</text>
+          <text class="d-s" x="862" y="29" text-anchor="middle"><tspan data-ko>앱 · PC · 데스크폰</tspan><tspan data-en>app · PC · deskphone</tspan></text>
+          <path class="d-thin" d="M58,40 V284 M228,40 V284 M452,40 V284 M676,40 V284 M862,40 V284"/>
+        </g>
+
+        <g class="msgs">
+          <g class="msg">
+            <path class="d-line" d="M58,66 H222" marker-end="url(#a)"/>
+            <text class="d-s" x="62" y="60">INVITE</text>
+          </g>
+          <g class="msg">
+            <path class="d-line" d="M228,100 H446" marker-end="url(#a)"/>
+            <text class="d-s" x="232" y="94">INVITE</text>
+          </g>
+          <g class="msg">
+            <path class="d-line" d="M452,134 H670" marker-end="url(#a)"/>
+            <text class="d-s" x="456" y="128"><tspan data-ko>Call-ID 해시로 분산</tspan><tspan data-en>spread by Call-ID hash</tspan></text>
+          </g>
+          <g class="msg">
+            <path class="d-line" d="M676,168 H856" marker-end="url(#a)"/>
+            <text class="d-s" x="680" y="162"><tspan data-ko>VoIP 푸시 → 재등록 → INVITE</tspan><tspan data-en>VoIP push → re-REGISTER → INVITE</tspan></text>
+          </g>
+          <g class="msg">
+            <path class="d-line" d="M856,202 H62" marker-end="url(#a)"/>
+            <text class="d-s" x="700" y="196" text-anchor="end">180 Ringing · 200 OK</text>
+          </g>
+          <g class="msg">
+            <path class="d-line d-sig" d="M62,244 H446" marker-end="url(#as)" marker-start="url(#as)" stroke-dasharray="5 4"/>
+            <text class="d-s d-sigf" x="62" y="238">RTP · G.711 μ-law</text>
+            <rect class="d-box2" x="600" y="228" width="152" height="34" rx="3"/>
+            <text class="d-s" x="676" y="249" text-anchor="middle"><tspan data-ko>또는 AI 응대로</tspan><tspan data-en>or hand off to AI</tspan></text>
+            <path class="d-line" d="M676,212 V224" marker-end="url(#a)"/>
+            <text class="d-s" x="676" y="280" text-anchor="middle"><tspan data-ko>녹음 3채널 → STT → 요약</tspan><tspan data-en>3-channel recording → STT → summary</tspan></text>
+          </g>
+        </g>
+      </svg>
+      <figcaption>
+        <span data-ko>전화 한 통이 지나는 길입니다. 이 글은 이 길의 가운데를 한 대에서 여러 대로 바꾼 이야기입니다.</span>
+        <span data-en>The path one call travels. This piece is about replacing the middle of it — one machine becoming several.</span>
+      </figcaption>
+    </figure>
+</div>
+
+<nav class="toc">
+  <ol>
+    <li><a href="#problem"><span data-ko>무엇이 문제였나</span><span data-en>The problem</span></a></li>
+    <li><a href="#ports"><span data-ko>주소를 바꾸지 않고 옮기기</span><span data-en>Moving without changing an address</span></a></li>
+    <li><a href="#ownership"><span data-ko>구조와 통화 소유권</span><span data-en>Architecture and call ownership</span></a></li>
+    <li><a href="#avaya"><span data-ko>현장 교환기 위에 서기</span><span data-en>Standing on an existing PBX</span></a></li>
+  </ol>
+</nav>
+
+<section class="block" id="problem">
+  <h2><span data-ko>무엇이 문제였나</span><span data-en>The problem</span></h2>
+  <p><span data-ko>오랫동안 Asterisk 한 대가 전화를 전부 받았습니다. 사용자가 수백 명일 때는 충분했지만, 메가스터디 지점이 붙으면서 그 한 대가 급소가 되었습니다. <strong>재시작 한 번이 여러 학원의 전화를 동시에 끊을 수 있는 구조였습니다.</strong></span><span data-en>For a long time one Asterisk answered every call. Fine at a few hundred users — but once Megastudy branches connected, that box became the weak point. <strong>A single restart could have taken several academies down together.</strong></span></p>
+  <p><span data-ko>증설이 필요한 이유는 처리량이 아니라 <strong>가용성</strong>이었습니다. 대기자는 서버에 거의 부담을 주지 않고, 먼저 막히는 것은 통신사와 계약한 인입 채널 수입니다. <strong>늘려야 할 것은 처리 용량이 아니라 급소의 개수였습니다.</strong></span><span data-en>The reason to add machines was <strong>availability</strong>, not throughput. Waiting callers cost almost nothing, and the real ceiling is the carrier’s inbound channel count. <strong>What needed multiplying was not capacity but the number of single points of failure.</strong></span></p>
+</section>
+
+<section class="block" id="ports">
+  <h2><span data-ko>주소를 바꾸지 않고 옮기기</span><span data-en>Moving without changing an address</span></h2>
+  <p><span data-ko>통신사에는 우리 주소 하나가 등록되어 있고, 앱과 데스크폰은 고정된 도메인 하나로 붙습니다. 그게 바뀌면 통신사와 다시 협의하고 현장 전화기를 한 대씩 만져야 합니다.</span><span data-en>The carrier has one of our addresses on file, and apps and desk phones connect to a single fixed domain. Change either and you renegotiate with the carrier and visit every handset.</span></p>
+  <p><span data-ko>그래서 원칙은 하나였습니다 — <strong>Kamailio가 Asterisk의 포트를 그대로 이어받고, Asterisk가 뒤로 비켜난다.</strong></span><span data-en>So the rule was singular: <strong>Kamailio inherits Asterisk’s ports, and Asterisk steps aside.</strong></span></p>
+  <table>
+    <thead><tr><th><span data-ko>진입점</span><span data-en>Entry point</span></th><th><span data-ko>전환 전</span><span data-en>Before</span></th><th><span data-ko>전환 후</span><span data-en>After</span></th></tr></thead>
+    <tbody>
+      <tr><td><span data-ko>통신사 회선</span><span data-en>Carrier trunk</span></td><td>Asterisk</td><td><strong>Kamailio</strong> <span data-ko>— 같은 포트</span><span data-en>— same port</span></td></tr>
+      <tr><td><span data-ko>데스크폰</span><span data-en>Desk phones</span></td><td>Asterisk</td><td><strong>Kamailio</strong> <span data-ko>— 같은 포트</span><span data-en>— same port</span></td></tr>
+      <tr><td><span data-ko>앱 (WSS)</span><span data-en>App (WSS)</span></td><td>Kamailio</td><td><span data-ko>그대로</span><span data-en>unchanged</span></td></tr>
+      <tr><td>Asterisk</td><td><span data-ko>바깥을 향함</span><span data-en>faced outward</span></td><td><span data-ko>내부 전용 포트로 이동</span><span data-en>moved to internal-only ports</span></td></tr>
+    </tbody>
+  </table>
+  <ul class="bullets">
+    <li><span data-ko>Asterisk의 외부 트랜스포트는 <strong>삭제하지 않고 이동만</strong> 했습니다. 삭제하면 이를 참조하던 엔드포인트가 깨지고 롤백도 할 수 없습니다.</span><span data-en>Asterisk’s transports were <strong>moved, never deleted</strong> — deleting breaks every endpoint referencing them and leaves no way back.</span></li>
+    <li><span data-ko>이 단계는 리로드가 아니라 <strong>재시작</strong>이어야 합니다. PJSIP은 리로드로 트랜스포트를 다시 바인딩하지 못해, 사라진 소켓이 남아 새 Kamailio가 포트를 못 잡습니다.</span><span data-en>This step must be a <strong>restart</strong>, not a reload — PJSIP cannot rebind transports, so the old socket lingers and Kamailio cannot claim the port.</span></li>
+  </ul>
+</section>
+
+<section class="block" id="ownership">
+  <h2><span data-ko>구조와 통화 소유권</span><span data-en>Architecture and call ownership</span></h2>
+<figure class="diagram">
+    <svg viewBox="0 0 900 272" role="img" aria-label="Kamailio front end with three Asterisk pods behind it">
+      <defs>
+        <marker id="t1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="var(--path)"/>
+        </marker>
+      </defs>
+      <rect class="d-box" x="30" y="42" width="150" height="34" rx="3"/>
+      <text class="d-t" x="105" y="64" text-anchor="middle"><tspan data-ko>통신사 회선</tspan><tspan data-en>carrier trunk</tspan></text>
+      <rect class="d-box" x="30" y="92" width="150" height="34" rx="3"/>
+      <text class="d-t" x="105" y="114" text-anchor="middle"><tspan data-ko>앱 · 데스크폰</tspan><tspan data-en>app · desk phone</tspan></text>
+
+      <path class="d-line" d="M180,59 H268" marker-end="url(#t1)"/>
+      <path class="d-line" d="M180,109 H268" marker-end="url(#t1)"/>
+
+      <rect class="d-box2" x="272" y="26" width="360" height="114" rx="4"/>
+      <text class="d-s" x="452" y="20" text-anchor="middle"><tspan data-ko>고정 주소 (바뀌지 않음)</tspan><tspan data-en>fixed address (unchanged)</tspan></text>
+      <rect class="d-box" x="292" y="48" width="150" height="70" rx="3"/>
+      <text class="d-t" x="367" y="78" text-anchor="middle">Kamailio</text>
+      <text class="d-s" x="367" y="96" text-anchor="middle"><tspan data-ko>시그널링 · 등록</tspan><tspan data-en>signalling · registrar</tspan></text>
+      <rect class="d-box" x="462" y="48" width="150" height="70" rx="3"/>
+      <text class="d-t" x="537" y="78" text-anchor="middle">rtpengine</text>
+      <text class="d-s" x="537" y="96" text-anchor="middle"><tspan data-ko>미디어</tspan><tspan data-en>media</tspan></text>
+
+      <path class="d-line" d="M452,140 V162"/>
+      <path class="d-line" d="M150,162 H754"/>
+      <path class="d-line" d="M150,162 V186" marker-end="url(#t1)"/>
+      <path class="d-line" d="M452,162 V186" marker-end="url(#t1)"/>
+      <path class="d-line" d="M754,162 V186" marker-end="url(#t1)"/>
+      <text class="d-s" x="462" y="156"><tspan data-ko>Call-ID 해시로 분산 · 15초 헬스체크</tspan><tspan data-en>spread by Call-ID hash · 15s health check</tspan></text>
+
+      <g>
+        <rect class="d-box" x="70" y="188" width="160" height="62" rx="3"/>
+        <text class="d-t" x="150" y="210" text-anchor="middle">Asterisk-1</text>
+        <text class="d-s" x="150" y="228" text-anchor="middle">call-handler-1</text>
+        <text class="d-s" x="150" y="243" text-anchor="middle"><tspan data-ko>받은 통화의 주인</tspan><tspan data-en>owns what it answers</tspan></text>
+      </g>
+      <g>
+        <rect class="d-box" x="372" y="188" width="160" height="62" rx="3"/>
+        <text class="d-t" x="452" y="210" text-anchor="middle">Asterisk-2</text>
+        <text class="d-s" x="452" y="228" text-anchor="middle">call-handler-2</text>
+        <text class="d-s" x="452" y="243" text-anchor="middle"><tspan data-ko>받은 통화의 주인</tspan><tspan data-en>owns what it answers</tspan></text>
+      </g>
+      <g>
+        <rect class="d-box" x="674" y="188" width="160" height="62" rx="3"/>
+        <text class="d-t" x="754" y="210" text-anchor="middle">Asterisk-3</text>
+        <text class="d-s" x="754" y="228" text-anchor="middle">call-handler-3</text>
+        <text class="d-s" x="754" y="243" text-anchor="middle"><tspan data-ko>받은 통화의 주인</tspan><tspan data-en>owns what it answers</tspan></text>
+      </g>
+    </svg>
+    <figcaption><span data-ko>Asterisk와 call-handler를 1:1 짝으로 묶고, 통화가 그 짝 안에서 끝나게 합니다. 분배기 상태가 프로세스 메모리에 있기 때문에, 이 전제를 지키면 상태를 전부 Redis로 옮기는 큰 공사를 피할 수 있습니다.</span><span data-en>Asterisk and its call-handler are paired one-to-one, and a call lives and dies inside that pair. The distributor keeps state in process memory, so honouring that rule avoids a much larger rewrite to move all of it into Redis.</span></figcaption>
+  </figure>
+  <h3><span data-ko>누가 그 통화의 주인인가</span><span data-en>Who owns the call</span></h3>
+  <p><span data-ko>분배기는 대기열을 공유 저장소에 두고 돕니다. 노드가 여럿이 되면 문제가 생깁니다 — <strong>A노드가 B노드에 붙은 대기자를 꺼내면, 그 채널을 만질 수 없어 통화를 잃습니다.</strong></span><span data-en>The distributor works off a shared queue. With several nodes: <strong>if node A pops a caller attached to node B, it cannot touch that channel and the call is lost.</strong></span></p>
+  <p><span data-ko>처음에는 <strong>그룹 어피니티</strong>로 막았습니다. 착신번호를 해시해 한 지점의 통화를 한 노드에 고정하면, 남의 대기자를 꺼낼 일이 없어집니다.</span><span data-en>My first answer was <strong>group affinity</strong> — hash the dialled number, pin a branch to one node, never pop someone else’s caller.</span></p>
+  <p><span data-ko><strong>하루 만에 제거했습니다.</strong> 꺼내는 일 자체를 소유자 기준으로 바꾸면 되는 문제였기 때문입니다. 큐 항목마다 그 통화를 쥔 인스턴스를 적어 두고, 각 노드는 자기가 주인인 대기자만 꺼냅니다.</span><span data-en><strong>I removed it a day later.</strong> The real fix was to make the dequeue ownership-aware: each entry records the instance holding the call, and a node pops only what it owns.</span></p>
+  <blockquote><p><span data-ko>어피니티의 이유는 하나뿐이었고, 그 이유는 사라졌습니다. 반면 <strong>비용은 실재했습니다</strong> — 고정에 쓰던 테이블 때문에 Kamailio 기동이 DB 뷰에 의존하게 됩니다. 운영 DB엔 그 뷰가 없어 그대로면 배포도 막혔습니다. <strong>사용하지 않는 기능을 위해 그 위험을 감수하는 것은 합리적이지 않습니다.</strong></span><span data-en>Affinity had exactly one reason, and it was gone. The <strong>cost was real</strong>: the pinning table made Kamailio’s startup depend on a database view that production did not have — it would have blocked the release. <strong>Carrying that risk for a feature nobody uses is not a reasonable trade.</strong></span></p></blockquote>
+
+  <h3><span data-ko>그래서 무엇으로 나누는가</span><span data-en>So what does the spreading</span></h3>
+  <table>
+    <thead><tr><th><span data-ko>해시 기준</span><span data-en>Hash over</span></th><th><span data-ko>결과</span><span data-en>What happens</span></th></tr></thead>
+    <tbody>
+      <tr><td><span data-ko>착신번호</span><span data-en>dialled number</span></td><td><span data-ko>대표번호가 하나뿐인 지점은 노드를 늘려도 <strong>한 대에 고정</strong></span><span data-en>a branch with one main line <strong>stays on one node</strong></span></td></tr>
+      <tr><td><span data-ko>인증 사용자명</span><span data-en>authenticated user</span></td><td><span data-ko>인증 없는 트렁크 인입이 <strong>한 노드로 쏠림</strong> — dev 실측 6/0</span><span data-en>trunk calls carry no credentials and <strong>pile onto one node</strong> — measured 6/0</span></td></tr>
+      <tr><td><span data-ko>Call-ID <strong>(채택)</strong></span><span data-en>Call-ID <strong>(chosen)</strong></span></td><td><span data-ko>통화마다 갈려 고르게 퍼짐 — 같은 조건 4/2</span><span data-en>differs per call, so it spreads — same test gave 4/2</span></td></tr>
+    </tbody>
+  </table>
+  <p><span data-ko>소유자 기준으로 꺼내면 새 문제가 하나 생깁니다 — <strong>노드가 죽으면 그 대기자를 아무도 안 꺼냅니다.</strong> 대기 인원만 부풀어 상한에 걸리고 멀쩡한 새 손님이 거절됩니다. 각 노드가 "살아 있다"를 주기적으로 찍고, 끊긴 노드의 항목은 다른 노드가 걷어냅니다.</span><span data-en>Ownership-aware dequeuing creates one new problem: <strong>when a node dies, nobody pops its callers.</strong> The queue inflates, hits its cap, and starts rejecting good callers. Each node writes a periodic liveness marker; entries from a node that stopped are swept by the others.</span></p>
+
+  <h3><span data-ko>N대가 되면 깨지는 것들</span><span data-en>What breaks at two</span></h3>
+  <table>
+    <thead><tr><th style="width:36%"><span data-ko>증상</span><span data-en>Symptom</span></th><th><span data-ko>원인과 조치</span><span data-en>Cause and fix</span></th></tr></thead>
+    <tbody>
+      <tr><td><span data-ko>전환·당겨받기가 N분의 1만 성공</span><span data-en>Transfer succeeds 1 in N times</span></td><td><span data-ko>그 통화를 쥐지 않은 인스턴스가 작업을 집어 갑니다. 큐를 노드별로 분리했습니다.</span><span data-en>An instance that does not hold the call picks up the job. The queue is sharded per node.</span></td></tr>
+      <tr><td><span data-ko>앱이 한 노드에만 등록됨</span><span data-en>The app registers with one node</span></td><td><span data-ko>Kamailio가 등록 정보를 쥐고 중계합니다. 다이얼 문자열이 바뀌어 다이얼플랜도 함께 손봅니다.</span><span data-en>Kamailio owns the location table and relays. The dial string changes, so the dialplan changes with it.</span></td></tr>
+      <tr><td><span data-ko>AI 미디어가 특정 서버를 가리킴</span><span data-en>AI media points at one server</span></td><td><span data-ko>Asterisk와 call-handler를 1:1 짝으로 묶으면 자연히 해결됩니다.</span><span data-en>Pairing Asterisk with its call-handler one-to-one resolves it.</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="block" id="avaya">
+  <h2><span data-ko>현장 교환기 위에 서기</span><span data-en>Standing on an existing PBX</span></h2>
+  <p><span data-ko>메가스터디 지점에는 이미 교환기와 전화기가 깔려 있었습니다. 요구는 명확했습니다 — <strong>전화기를 한 대도 바꾸지 않는다.</strong></span><span data-en>Megastudy’s branches already had an exchange and handsets in place. The requirement was blunt: <strong>replace no phones.</strong></span></p>
+  <p><span data-ko>처음 세운 전제는 검토 과정에서 무너졌습니다. 그래서 <strong>교환기를 건드리지 않고 그 위에 서는</strong> 구조로 다시 썼습니다. 제로콜이 ARS·AI·큐·녹음·통계를 맡고, 기존 설비는 내선까지 배달만 합니다.</span><span data-en>My first assumption did not survive review, so I rewrote the design to <strong>sit on top of the exchange without touching it.</strong> ZeroCall owns the IVR, the AI, the queue, recording and statistics; the existing equipment only delivers to the extension.</span></p>
+  <p><span data-ko>연결은 <strong>AWS Site-to-Site VPN</strong>으로 사설망을 잇고, SBC 역할은 이미 운영 중인 Kamailio와 rtpengine이 맡습니다. 공인망에 노출하지 않고, 장비도 새로 사지 않았습니다.</span><span data-en>The link is an <strong>AWS site-to-site VPN</strong> joining the private networks, with the SBC role played by the Kamailio and rtpengine we already run — nothing exposed publicly, no new hardware bought.</span></p>
+  <blockquote><p><span data-ko>고객사에 요청한 것은 <strong>주소 대역 한 줄</strong>입니다. SIP를 받는 쪽과 RTP를 받는 쪽, 이중화까지 전부 그 안에 들어가도록 배치했습니다. <strong>방화벽 변경을 다시 요청할 일이 없게</strong> 하려는 것이었습니다.</span><span data-en>What I asked the customer for was <strong>a single address range</strong>, laid out so that the SIP side, the RTP side and the standby pair all fit inside it. The point was to <strong>never have to come back for another firewall change.</strong></span></p></blockquote>
+</section>
+
+<section class="block">
+  <h2><span data-ko>지금</span><span data-en>Where it stands</span></h2>
+  <div class="outcome">
+    <ul>
+      <li><span data-ko>Kamailio 2대 액티브·스탠바이. 장애 시 공인 IP가 유지되어 통신사와 클라이언트 설정은 그대로입니다.</span><span data-en>Two Kamailio nodes, active/standby. The public IP survives failover, so nothing is reconfigured.</span></li>
+      <li><span data-ko>Asterisk 3대 부하 분산. 15초 주기로 상태를 확인해 장애 노드를 자동으로 뺍니다.</span><span data-en>Three Asterisk nodes, health-checked every 15 seconds and dropped automatically on failure.</span></li>
+      <li><span data-ko>노드를 늘리는 일이 <strong>목록에 한 줄 더하고 리로드</strong>가 됐습니다.</span><span data-en>Adding a node became <strong>one line in a list and a reload.</strong></span></li>
+      <li><span data-ko>전환 당일 통신사 협의도, 현장 전화기 재설정도 없었습니다.</span><span data-en>On cutover day there was no call to the carrier and no visit to a handset.</span></li>
+    </ul>
+  </div>
+</section>
+<div class="casenav">
+  <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
+  <a href="/cases/infra.html"><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></a>
+  <a href="/cases/silent-failures.html"><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></a>
+  <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+</div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-ko>이원주 · 소프트웨어 엔지니어</span><span data-en>Wonju Lee · Software Engineer</span>
+    <span class="mono">2026</span>
+  </div>
+</footer>
+
+</body>
+</html>

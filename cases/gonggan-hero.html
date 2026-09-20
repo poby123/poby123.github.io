@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko" data-lang="ko" data-title-en="Stopping a double booking within three minutes — Wonju Lee">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3분 안에 중복 예약을 막기 — 이원주</title>
+<meta name="description" content="7개 예약 플랫폼을 3분 주기로 동기화해 중복 예약을 막는 시스템. 크롤러 샤딩, Bull 큐 순서 보장, 세션 관리, 알림톡 자동 발송.">
+<meta property="og:title" content="3분 안에 중복 예약을 막기 — 이원주">
+<meta property="og:description" content="7개 예약 플랫폼을 3분 주기로 동기화해 중복 예약을 막는 시스템. 크롤러 샤딩, Bull 큐 순서 보장, 세션 관리, 알림톡 자동 발송.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('wonju.lang')||'ko';document.documentElement.dataset.lang=l;document.documentElement.lang=l;}catch(e){}document.documentElement.className='anim';</script>
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><span data-ko>이원주 <i>· 소프트웨어 엔지니어</i></span><span data-en>Wonju Lee <i>· Software Engineer</i></span></a>
+    <nav>
+      <a href="/#cases" class="hide-sm"><span data-ko>케이스 스터디</span><span data-en>Case studies</span></a>
+      <a href="/#contact"><span data-ko>연락</span><span data-en>Contact</span></a>
+      <span class="langswitch">
+        <button type="button" data-set-lang="ko" aria-pressed="true">KO</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<div class="case-hero">
+  <p class="kicker"><a href="/">←</a> &nbsp;<span data-ko>케이스 스터디 · 공간히어로</span><span data-en>Case study · Gonggan Hero</span></p>
+  <h1><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></h1>
+  <p class="lead"><span data-ko>같은 시간이 <strong>두 번 팔리기 전에</strong> 다른 플랫폼의 그 시간을 닫아야 했습니다. 예산은 3분입니다.</span><span data-en>The slot has to close on the other platforms <strong>before it sells twice.</strong> The budget is three minutes.</span></p>
+  <dl class="specsheet">
+    <div><dt><span data-ko>기간</span><span data-en>Period</span></dt><dd>2024.03 – <span data-ko>현재</span><span data-en>present</span></dd></div>
+    <div><dt><span data-ko>역할</span><span data-en>Role</span></dt><dd><span data-ko>개발 리드 · 운영</span><span data-en>Engineering lead, operations</span></dd></div>
+    <div><dt><span data-ko>스택</span><span data-en>Stack</span></dt><dd><span class="mono">NestJS · TypeORM · MySQL · Redis/Bull · Next.js · Playwright · k3s</span></dd></div>
+    <div><dt><span data-ko>규모</span><span data-en>Scale</span></dt><dd><span data-ko>호스트 511명 · 공간 674개 · 일 1,400건</span><span data-en>511 hosts · 674 spaces · 1,400 bookings/day</span></dd></div>
+  </dl>
+
+  <div class="context">
+    <h2><span data-ko>배경</span><span data-en>Background</span></h2>
+    <p><span data-ko>공간히어로는 댄스 연습실·파티룸·회의실을 빌려주는 사장님들을 위한 SaaS입니다. 2024년 3월부터 개발을 리드하고 운영까지 맡고 있습니다.</span><span data-en>Gonggan Hero is SaaS for people who rent out dance studios, party rooms and meeting rooms. I have led its engineering and run it since March 2024.</span></p>
+    <p><span data-ko>사장님들은 한 공간을 네이버·스페이스클라우드·여기어때 같은 여러 플랫폼에 <strong>동시에</strong> 올려 둡니다. 그리고 그 플랫폼들은 서로를 모릅니다.</span><span data-en>Hosts list one room on Naver, SpaceCloud, Yeogi and others <strong>at the same time</strong> — and none of those platforms knows about the others.</span></p>
+  </div>
+  <div class="summary">
+    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
+    <ul>
+      <li><span data-ko>중복 예약 한 건은 <strong>사장님의 사과와 환불</strong>입니다. 이 제품의 본질은 캘린더가 아니라 이를 막는 것입니다.</span><span data-en>One double booking costs the host <strong>an apology and a refund.</strong> This product is not a calendar; it is the thing that prevents that.</span></li>
+      <li><span data-ko>그래서 목표는 <strong>3분</strong>입니다. 수집 주기가 그보다 길면 그 사이에 팔립니다.</span><span data-en>So the target is <strong>three minutes</strong> — poll less often and it sells in the gap.</span></li>
+      <li><span data-ko>크롤러를 플랫폼·샤드로 나눠 병렬화하고, <strong>Bull 큐로 순서를 지킵니다.</strong> 추가와 취소가 뒤바뀌면 취소된 예약이 되살아납니다.</span><span data-en>Crawlers are sharded per platform and <strong>Bull queues keep the ordering</strong> — swap an add and a cancel and a cancelled booking comes back.</span></li>
+      <li><span data-ko>호스트 511명 · 공간 674개 · 하루 약 1,400건.</span><span data-en>511 hosts, 674 spaces, about 1,400 bookings a day.</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<section class="block">
+  <h2><span data-ko>중복 예약 한 건의 값</span><span data-en>What one double booking costs</span></h2>
+  <p><span data-ko>댄스 연습실 사장님은 보통 공간 하나를 네이버, 스페이스클라우드, 여기어때, 아워플레이스에 동시에 올려 둡니다. 각 플랫폼은 서로를 모릅니다. 토요일 오후 3시가 두 곳에서 동시에 팔리면, 사장님은 한 손님에게 전화해 사과하고 환불하고 다른 자리를 찾아 줘야 합니다.</span><span data-en>A studio owner usually lists the same room on Naver, SpaceCloud, Yeogi and Hourplace at once. None of those platforms knows about the others. When Saturday 3pm sells twice, the owner has to phone one customer, apologise, refund, and find them another slot.</span></p>
+  <p><span data-ko>그래서 이 제품의 기능 목록에서 가장 위에 있는 것은 캘린더도 대시보드도 아니고 <strong>중복 예약을 막는 것</strong>입니다. 그리고 그것은 결국 시간 문제입니다 — 한 플랫폼에서 예약이 들어온 순간부터 다른 플랫폼에서 그 시간을 닫기까지 얼마나 걸리느냐.</span><span data-en>So the top item on this product’s feature list is not the calendar or the dashboard but <strong>not letting that happen</strong>. And that is a question of time: how long between a booking landing on one platform and that slot closing on the others.</span></p>
+  <blockquote><p><span data-ko>목표를 <strong>3분</strong>으로 잡았습니다. 플랫폼별 수집 주기가 3분을 넘으면 그 사이에 팔립니다.</span><span data-en>We set the target at <strong>three minutes</strong>. Any platform polled less often than that sells the slot in the gap.</span></p></blockquote>
+</section>
+
+<section class="block">
+  <h2><span data-ko>3분을 맞추는 방법</span><span data-en>How the three minutes are held</span></h2>
+  <figure class="diagram">
+    <svg viewBox="0 0 900 232" role="img" aria-label="Per-platform crawlers feed queues, then synchroniser and validator, then the host API and messaging">
+      <defs>
+        <marker id="g1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="var(--path)"/>
+        </marker>
+      </defs>
+      <text class="d-s" x="24" y="22"><tspan data-ko>7개 예약 플랫폼</tspan><tspan data-en>7 booking platforms</tspan></text>
+      <g>
+        <rect class="d-box" x="24" y="32" width="150" height="26" rx="3"/><text class="d-t" x="99" y="50" text-anchor="middle">Naver</text>
+        <rect class="d-box" x="24" y="64" width="150" height="26" rx="3"/><text class="d-t" x="99" y="82" text-anchor="middle">SpaceCloud</text>
+        <rect class="d-box" x="24" y="96" width="150" height="26" rx="3"/><text class="d-t" x="99" y="114" text-anchor="middle">Hourplace</text>
+        <rect class="d-box" x="24" y="128" width="150" height="26" rx="3"/><text class="d-t" x="99" y="146" text-anchor="middle">Yeogi</text>
+        <rect class="d-box2" x="24" y="160" width="150" height="26" rx="3"/><text class="d-s" x="99" y="178" text-anchor="middle">+ 3</text>
+      </g>
+
+      <path class="d-line" d="M174,109 H232" marker-end="url(#g1)"/>
+
+      <rect class="d-box" x="234" y="56" width="164" height="106" rx="3"/>
+      <text class="d-t" x="316" y="82" text-anchor="middle"><tspan data-ko>크롤러</tspan><tspan data-en>Crawlers</tspan></text>
+      <text class="d-s" x="316" y="102" text-anchor="middle"><tspan data-ko>플랫폼별 · 샤드별</tspan><tspan data-en>per platform, sharded</tspan></text>
+      <text class="d-s" x="316" y="119" text-anchor="middle"><tspan data-ko>세션 스케줄러가</tspan><tspan data-en>sessions kept alive</tspan></text>
+      <text class="d-s" x="316" y="134" text-anchor="middle"><tspan data-ko>로그인 세션 유지</tspan><tspan data-en>by the session scheduler</tspan></text>
+
+      <path class="d-line" d="M398,109 H456" marker-end="url(#g1)"/>
+      <text class="d-s" x="404" y="102">Bull</text>
+
+      <rect class="d-box" x="458" y="56" width="164" height="106" rx="3"/>
+      <text class="d-t" x="540" y="82" text-anchor="middle"><tspan data-ko>동기화 · 검증</tspan><tspan data-en>Sync · validate</tspan></text>
+      <text class="d-s" x="540" y="102" text-anchor="middle"><tspan data-ko>추가 · 변경 · 삭제 반영</tspan><tspan data-en>apply add / change / delete</tspan></text>
+      <text class="d-s" x="540" y="119" text-anchor="middle"><tspan data-ko>겹치는 시간 검사</tspan><tspan data-en>detect overlapping slots</tspan></text>
+      <text class="d-s" x="540" y="134" text-anchor="middle"><tspan data-ko>다른 플랫폼 시간 닫기</tspan><tspan data-en>close the slot elsewhere</tspan></text>
+
+      <path class="d-line" d="M622,109 H680" marker-end="url(#g1)"/>
+
+      <rect class="d-box" x="682" y="40" width="194" height="46" rx="3"/>
+      <text class="d-t" x="779" y="62" text-anchor="middle"><tspan data-ko>캘린더 · 매출 대시보드</tspan><tspan data-en>Calendar · revenue</tspan></text>
+      <text class="d-s" x="779" y="78" text-anchor="middle">host-api</text>
+      <rect class="d-box" x="682" y="96" width="194" height="46" rx="3"/>
+      <text class="d-t" x="779" y="118" text-anchor="middle"><tspan data-ko>알림톡 · 문자</tspan><tspan data-en>Messaging</tspan></text>
+      <text class="d-s" x="779" y="134" text-anchor="middle"><tspan data-ko>확정 · 리마인드 · 종료</tspan><tspan data-en>confirm · remind · check-out</tspan></text>
+    </svg>
+    <figcaption><span data-ko>크롤러는 플랫폼별로 나뉘고, 트래픽이 많은 플랫폼은 다시 샤드로 나뉩니다. 수집과 반영을 분리하고 그 사이를 Bull 큐로 이어 순서를 지킵니다.</span><span data-en>Crawlers are split per platform, and the busiest platforms are sharded again. Collection and application are separated, with Bull queues between them preserving order.</span></figcaption>
+  </figure>
+  <ul class="bullets">
+    <li><span data-ko><strong>병렬화</strong> — 플랫폼을 순서대로 돌면 3분을 넘깁니다. 앱을 플랫폼별로 나누고, 공간이 많은 플랫폼은 인스턴스를 샤드로 더 나눴습니다. 크롤러 앱의 복제본 수는 성능 조절 값이 아니라 <strong>샤드 개수 그 자체</strong>입니다.</span><span data-en><strong>Parallelism</strong> — polling platforms in sequence blows the budget, so each platform is its own app, and the largest ones are split again across sharded instances. A crawler’s replica count is not a performance dial; it <strong>is</strong> the shard count.</span></li>
+    <li><span data-ko><strong>순서 보장</strong> — 같은 예약에 대한 추가와 취소가 뒤바뀌면 취소된 예약이 되살아납니다. Bull 큐를 플랫폼별로 두어 동기화 순서를 지킵니다.</span><span data-en><strong>Ordering</strong> — if an add and a cancel for the same booking arrive out of order, a cancelled booking comes back to life. Per-platform Bull queues keep the sequence.</span></li>
+    <li><span data-ko><strong>세션 유지</strong> — 플랫폼 대부분은 로그인이 필요하고 세션은 수시로 만료됩니다. 세션만 따로 관리하는 앱을 두어, 크롤러가 매번 로그인하느라 시간을 쓰지 않게 했습니다.</span><span data-en><strong>Sessions</strong> — most platforms need a login and sessions expire constantly. A separate app owns session lifetime so crawlers never spend their budget logging in.</span></li>
+    <li><span data-ko><strong>API가 있으면 크롤링하지 않습니다.</strong> 공개 API를 제공하는 플랫폼은 폴링으로 붙였습니다. 크롤링은 다른 방법이 없을 때만 씁니다.</span><span data-en><strong>Where an API exists, we do not scrape.</strong> Platforms with a public API are polled properly; scraping is the fallback, not the default.</span></li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span data-ko>기능은 사용자의 필요에서 나왔다</span><span data-en>The features came from the hosts</span></h2>
+  <figure class="diagram">
+    <img src="/assets/img/gonggan-hero-integration.png" alt="플랫폼별 세부공간 연동 화면" loading="lazy">
+    <figcaption><span data-ko>플랫폼별로 세부공간을 연결하는 화면입니다.</span><span data-en>The screen where a host maps each of their rooms to its listing on every platform.</span></figcaption>
+  </figure>
+  <p><span data-ko>처음에는 한 플랫폼에 공간 하나만 연결할 수 있게 만들었습니다. 그런데 하나의 플랫폼에 같은 공간을 여러 개 등록해 운영하시는 분들이 계셨습니다. 시간대별로 가격을 다르게 받으려고 그렇게 하신 것이었습니다. 다대다로 바꿨고, 이런 피드백을 하나씩 반영한 결과가 경쟁사와의 차이가 되었습니다.</span><span data-en>The first version allowed one room per platform. Then we met hosts who had listed the same room several times on one platform — to charge different prices at different hours. We made the mapping many-to-many. Differences like this one, accumulated, are what set the product apart.</span></p>
+  <p><span data-ko>주 사용자가 40~60대 공간 사장님들이라는 점이 화면 설계를 지배했습니다. 화면은 단순해야 했고, 기능은 강력해야 했습니다. 이 둘이 충돌할 때는 복잡함을 서버로 밀어 넣었습니다.</span><span data-en>Most hosts are in their 40s to 60s, and that governed the interface. The screens had to stay plain while the capability stayed strong; wherever those two collided, the complexity went into the server.</span></p>
+  <ul class="bullets">
+    <li><span data-ko><strong>예약 캘린더</strong> — 여러 플랫폼의 예약을 하나의 달력에서 봅니다. 직접 잡는 일정과 반복 일정도 같은 자리에 들어갑니다.</span><span data-en><strong>One calendar</strong> for every platform’s bookings, plus the host’s own entries and recurring blocks in the same place.</span></li>
+    <li><span data-ko><strong>매출 대시보드</strong> — 일·주·월별 매출과 플랫폼별 비중을 예약 데이터에서 바로 계산합니다. 사장님이 따로 정산 시트를 쓰지 않아도 됩니다.</span><span data-en><strong>Revenue dashboard</strong> — daily, weekly and monthly revenue and the split by platform, computed from the bookings themselves, so no one keeps a side spreadsheet.</span></li>
+    <li><span data-ko><strong>알림톡 자동 발송</strong> — 예약 확정, 이용 전 리마인드, 종료 전 안내. 리마인드에는 예약 종료 시각에 스스로 만료되는 출입 비밀번호 안내 링크가 함께 갑니다.</span><span data-en><strong>Automated messages</strong> — confirmation, a reminder before arrival, and a nudge before check-out. The reminder carries a door-code page whose link expires by itself when the booking ends.</span></li>
+    <li><span data-ko><strong>구독 결제</strong> — 결제 수단 등록과 월 구독 스케줄링, 친구 초대 크레딧과 쿠폰까지 직접 만들었습니다.</span><span data-en><strong>Subscription billing</strong> — card registration, monthly scheduling, referral credit and coupons, all built in-house.</span></li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span data-ko>사고 하나 — 막으려던 장치가 구멍을 냈다</span><span data-en>An incident — the guard that made the hole</span></h2>
+  <p><span data-ko>2026년 8월, 한 지점의 한 홀에서 <strong>중복예약 두 건</strong>이 났습니다. 막으려고 만든 제품에서 정확히 그 일이 났으니 원인을 끝까지 봐야 했습니다.</span><span data-en>In August 2026, <strong>two double bookings</strong> happened in a single hall at one branch. The product exists to prevent exactly that, so the cause had to be traced all the way down.</span></p>
+  <p><span data-ko>시작은 <strong>24초 만에 취소된 예약</strong>이었습니다. 취소됐는데 그 예약이 플랫폼에 걸어 둔 차단 블록이 지워지지 않고 남았습니다.</span><span data-en>It started with a booking <strong>cancelled 24 seconds after it was made.</strong> It was cancelled, but the blocking entry it had placed on the platform stayed behind.</span></p>
+  <p><span data-ko>그 유령 블록이 이후의 모든 차단 요청을 막았습니다. 차단은 <strong>연속 구간 한 건으로 보내는데</strong>, 한 시간만 겹쳐도 요청 전체가 "이미 예약이 있습니다"로 거절됩니다. 그래서 <strong>겹치지도 않는 시간까지 안 막힌 채 남았고</strong>, 그 빈 시간으로 다른 플랫폼 예약이 들어왔습니다.</span><span data-en>That ghost entry then blocked every later request. A block is sent <strong>as one continuous range</strong>, so a single overlapping hour gets the whole request rejected as "already booked". Hours that did not overlap at all <strong>were left open</strong> — and another platform sold them.</span></p>
+  <blockquote><p><span data-ko>가장 아쉬웠던 지점은 다음과 같습니다. <strong>검증기는 10분마다 이 상태를 잡아내고 있었습니다.</strong> 그런데 유령을 지우는 코드가 없어서, 잡아내고도 계속 거절만 맞고 있었습니다. <strong>탐지는 있는데 복구가 없으면, 알면서 당합니다.</strong></span><span data-en>The part that stung: <strong>the validator was catching this every ten minutes.</strong> But nothing could delete a ghost, so it detected the problem and kept being rejected anyway. <strong>Detection without recovery means watching yourself fail.</strong></span></p></blockquote>
+
+  <h3><span data-ko>방어를 세 겹으로 두었습니다</span><span data-en>Three layers, so one breach is not enough</span></h3>
+  <ul class="bullets">
+    <li><span data-ko><strong>겹침으로 거절당하면 구간을 한 시간씩 쪼개 넣습니다.</strong> 넣을 수 있는 시간은 반드시 들어가고, 못 넣는 시간은 이미 막혀 있는 시간뿐입니다. 단 <strong>한 시간짜리 요청의 거절만</strong> "이미 막힘 = 목적 달성"으로 봅니다 — 통짜 요청의 거절은 어딘가 겹친다는 뜻일 뿐이라 그렇게 해석해서는 안 됩니다.</span><span data-en><strong>When a range is rejected, it is retried hour by hour.</strong> Every hour that can be blocked gets blocked, and the only ones that fail are already blocked. But <strong>only a single-hour rejection</strong> counts as "already blocked, goal met" — a rejected range only means something in it overlaps, and reading that as success is how you fool yourself.</span></li>
+    <li><span data-ko><strong>취소 동기화가 실패하면 추가를 보류하고 재시도합니다.</strong> 삭제되지 않은 블록과 겹친 채로 추가하면 거절은 확정입니다. 직전 사고가 <strong>일시 오류 한 번에 포기해서</strong> 시작되었음을 확인하고, 삭제에도 재시도를 넣었습니다.</span><span data-en><strong>If the cancellation fails to sync, the add is held back and retried.</strong> Adding while a stale block still overlaps guarantees rejection. The previous incident had begun by <strong>giving up after a single transient error</strong>, so deletion got a retry too.</span></li>
+    <li><span data-ko><strong>검증기가 예약이 차지하는 시간을 전부 대조합니다.</strong> 예전에는 시작 시각 한 칸만 봐서, 14~17시 예약이 14시만 막혀 있어도 정상으로 통과시켰습니다.</span><span data-en><strong>The validator now checks every hour a booking occupies.</strong> It used to look only at the start, so a 2–5pm booking passed as healthy with only 2pm actually blocked.</span></li>
+  </ul>
+
+  <h3><span data-ko>남의 캘린더를 지우는 코드</span><span data-en>Code that deletes someone else’s calendar</span></h3>
+  <p><span data-ko>유령을 매시간 걷어내는 배치를 붙였습니다. 다만 이는 <strong>외부 플랫폼의 캘린더를 삭제하는 코드</strong>이므로, 잘못 동작하면 정상 차단을 삭제해 중복예약을 오히려 유발합니다. 안전장치를 네 가지 두었습니다.</span><span data-en>An hourly sweep now removes ghosts. But this is <strong>code that deletes entries on someone else’s platform</strong> — get it wrong and it erases real blocks, causing the very thing it prevents. It has four guards.</span></p>
+  <ul class="bullets">
+    <li><span data-ko>우리가 만든 이름의 항목만, 살아 있는 예약이 요구하지 않는 시간만 지웁니다. 한 시간이라도 걸치면 남깁니다.</span><span data-en>It only touches entries we created, only for hours no live booking needs, and keeps anything that overlaps by even an hour.</span></li>
+    <li><span data-ko><strong>유령 비율이 절반을 넘으면 배치를 건너뜁니다.</strong> 이는 유령이 많은 것이 아니라 판정이 틀어졌다는 뜻입니다.</span><span data-en><strong>If more than half look like ghosts, the batch skips.</strong> That does not mean many ghosts; it means the judgement is broken.</span></li>
+    <li><span data-ko>기본값은 <strong>로그만 남기는 관찰 모드</strong>입니다. 활성화는 별도 설정으로 분리했습니다.</span><span data-en>The default is <strong>observe-only</strong>. Actually deleting requires a separate switch.</span></li>
+    <li><span data-ko>배포 전에 운영 데이터 사본으로 <strong>영향 범위를 먼저 셌습니다</strong> — 유령 1,315건, 5,174시간. 얼마나 지울지 모르는 채로 켜지 않았습니다.</span><span data-en>Before release I <strong>measured the blast radius</strong> on a copy of production data — 1,315 ghosts across 5,174 hours. I did not switch it on without knowing how much it would delete.</span></li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span data-ko>사고 둘 — 커넥션이 다 찼다</span><span data-en>A second incident — the connection pool filled up</span></h2>
+  <p><span data-ko>2026년 7월, 데이터베이스가 <strong>연결 상한(200)을 다 채워 신규 연결을 거부</strong>했습니다. 여러 앱이 동시에 죽는 종류의 장애입니다.</span><span data-en>In July 2026 the database <strong>hit its connection limit of 200 and started refusing new connections</strong> — the kind of failure that takes several apps down at once.</span></p>
+  <p><span data-ko>상태를 보니 이상했습니다. <strong>실제로 일하는 커넥션은 3개인데 연결은 201개</strong>였고, 대부분 <strong>7시간 넘게 잠들어</strong> 있었습니다. 동시성 문제가 아니라는 뜻입니다.</span><span data-en>The numbers were strange: <strong>3 connections actually working, 201 open</strong>, most of them <strong>asleep for over seven hours.</strong> So it was not a concurrency problem.</span></p>
+  <p><span data-ko>드라이버의 <strong>유휴 반납 기본값이 커넥션 상한과 같았습니다.</strong> 설정이 없으면 피크 때 늘어난 유휴 커넥션을 <strong>하나도 반납하지 않습니다.</strong> 그게 DB의 타임아웃(기본 8시간)까지 살아남아 파드 수만큼 곱해져 쌓였습니다.</span><span data-en>The driver’s <strong>idle-release default equalled the connection limit.</strong> Without configuration it <strong>returns none of the idle connections</strong> it opened at peak. They survived until the database’s own timeout (8 hours by default), multiplied by the number of pods.</span></p>
+  <blockquote><p><span data-ko>고치면서 <strong>커넥션 상한은 일부러 건드리지 않았습니다.</strong> 상한을 낮추면 동시 요청이 대기에 걸려 지연이 생깁니다. 문제는 동시성이 아니라 유휴 누적이었으므로, <strong>유휴 반납만 손대면 되는 문제였습니다.</strong> 눈에 보이는 손잡이가 정답인 경우는 드뭅니다.</span><span data-en>While fixing it I <strong>deliberately left the connection limit alone.</strong> Lowering it would make concurrent requests queue and add latency. The problem was idle accumulation, not concurrency, so <strong>only the idle-release settings needed to change.</strong> The knob you can see is rarely the right one.</span></p></blockquote>
+  <p><span data-ko>앱이 DB보다 <strong>먼저</strong> 유휴 커넥션을 정리하도록 시간을 맞췄습니다. 반대면 서버가 끊은 커넥션을 앱이 모른 채 쓰다가 "연결이 사라졌다"는 오류를 냅니다.</span><span data-en>The app now releases idle connections <strong>sooner</strong> than the database would. The other way round, the server closes them and the app keeps using the corpse until it errors out.</span></p>
+</section>
+
+<section class="block">
+  <h2><span data-ko>두 사고가 같은 이야기인 이유</span><span data-en>Why both incidents are the same story</span></h2>
+  <p><span data-ko>이 시스템의 대부분은 <strong>남의 화면이 바뀌면 깨집니다.</strong> 그래서 크롤러마다 실패를 조용히 삼키지 않고 즉시 알리게 했고, 실패한 플랫폼만 따로 재시도할 수 있게 나눴습니다.</span><span data-en>Most of this system <strong>breaks when somebody else’s page changes.</strong> So no crawler swallows a failure quietly, and a single failing platform can be retried on its own.</span></p>
+  <blockquote><p><span data-ko>B2B 제품에서 가장 값비싼 버그는 서버가 죽는 것이 아니라 <strong>조용히 틀린 값을 보여 주는 것</strong>입니다. 예약이 하나 빠진 캘린더는 에러를 내지 않습니다. 사장님이 그 시간을 다시 팔고 나서야 드러납니다.</span><span data-en>In a B2B product the expensive bug is not the crash but <strong>the quietly wrong number.</strong> A calendar missing one booking raises no error. You find out when the host sells that hour again.</span></p></blockquote>
+</section>
+
+<section class="block">
+  <h2><span data-ko>지금</span><span data-en>Where it stands</span></h2>
+  <div class="outcome">
+    <ul>
+      <li><span data-ko>511명의 호스트가 674개 공간을 등록해 운영하고 있습니다.</span><span data-en>511 hosts run 674 spaces on it.</span></li>
+      <li><span data-ko>7개 플랫폼에서 하루 약 1,400건의 예약을 가져와 하나의 캘린더로 합칩니다.</span><span data-en>About 1,400 reservations a day are pulled from 7 platforms into a single calendar.</span></li>
+      <li><span data-ko>NestJS 모노레포의 앱 13개가 k3s 위에서 돌고 있습니다. 시작부터 운영까지 개발을 리드했습니다.</span><span data-en>Thirteen apps from one NestJS monorepo run on k3s. I have led the engineering from the first commit through operations.</span></li>
+    </ul>
+  </div>
+</section>
+
+
+<div class="casenav">
+  <a href="/cases/infra.html"><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></a>
+  <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
+  <a href="/cases/silent-failures.html"><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></a>
+  <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+</div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-ko>이원주 · 소프트웨어 엔지니어</span><span data-en>Wonju Lee · Software Engineer</span>
+    <span class="mono">2026</span>
+  </div>
+</footer>
+
+</body>
+</html>

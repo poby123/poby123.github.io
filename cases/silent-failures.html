@@ -49,15 +49,6 @@
     <p><span data-ko>제로콜의 전화는 학원의 대표번호로 걸려 옵니다. 배포가 잘못되면 그 번호가 안 받아지고, <strong>되돌리는 동안에도 고객 전화는 계속 걸려 옵니다.</strong></span><span data-en>ZeroCall carries an academy’s main line. A bad release means that number stops answering — and <strong>customers keep calling while you roll back.</strong></span></p>
     <p><span data-ko>고쳐 보고 아니면 되돌리는 방식이 통하지 않는 시스템에서, 무엇을 어떻게 확인해 왔는지에 대한 기록입니다.</span><span data-en>This is a record of what I verify, and how, in a system where "try it and roll back" is not available.</span></p>
   </div>
-  <div class="summary">
-    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
-    <ul>
-      <li><span data-ko>발신번호를 고르는 로직이 <strong>서버 코드에 없어서</strong>, 시험이 원본 파일에서 쿼리를 꺼내 실제 DB에 돌립니다.</span><span data-en>The caller-ID logic <strong>is not in the server code</strong>, so the test lifts the query from its source file and runs it against the real database.</span></li>
-      <li><span data-ko>부하 시험의 판정 기준은 CPU가 아니라 <strong>이벤트 루프 지연</strong>입니다. CPU가 여유 있는데 음질이 먼저 무너집니다.</span><span data-en>Load testing is judged on <strong>event-loop lag</strong>, not CPU — audio degrades while CPU still looks fine.</span></li>
-      <li><span data-ko>AI 응대는 <strong>마이크로 직접 말을 걸어</strong> 어떤 도구를 호출했는지 봅니다.</span><span data-en>The voice agent is tested <strong>by speaking to it</strong> and watching which tools it calls.</span></li>
-      <li><span data-ko>배포 안전장치가 <strong>세 가지 방식으로 조용히 실패</strong>하고 있었습니다. 가장 심각했던 것은 조회 실패를 "통화 없음"으로 읽던 것입니다.</span><span data-en>The release guard was <strong>failing silently in three ways</strong> — worst of all, reading a failed query as "no calls".</span></li>
-    </ul>
-  </div>
 </div>
 
 <nav class="toc">

@@ -49,15 +49,6 @@
     <p><span data-ko>플로버에는 서비스가 하나였습니다. 공간히어로를 EC2에 올리고 스크립트로 배포하면 충분했습니다.</span><span data-en>Flover had one service. Putting Gonggan Hero on EC2 and deploying with scripts was enough.</span></p>
     <p><span data-ko>제로콜이 붙고 그 아래로 메시징·결제 서비스가 늘면서 상황이 달라졌습니다. <strong>인프라를 전담하는 사람은 따로 없었습니다.</strong></span><span data-en>Then ZeroCall arrived, with messaging and billing services under it. <strong>There was no one whose job was infrastructure.</strong></span></p>
   </div>
-  <div class="summary">
-    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
-    <ul>
-      <li><span data-ko>매니페스트가 <strong>공간히어로 저장소 안에 제로콜 것까지</strong> 들어 있었습니다. 서비스마다 배포 방식도 달랐습니다.</span><span data-en>ZeroCall’s manifests were living <strong>inside the Gonggan Hero repository</strong>, and every service deployed differently.</span></li>
-      <li><span data-ko>서버비와 조직 규모를 재고 <strong>EKS 대신 k3s</strong>를 골랐습니다. 컨트롤 플레인 값을 매달 지불하는 것은 그 규모에서 얻는 것이 적었습니다.</span><span data-en>Weighing cost against team size, I chose <strong>k3s over EKS</strong> — a monthly control-plane bill buys little at that size.</span></li>
-      <li><span data-ko><strong>배포는 의도적으로 수동</strong>입니다. CI는 태그만 커밋하고, 누를 시점은 사람이 정합니다.</span><span data-en><strong>Deployment is manual on purpose</strong> — CI commits a tag, a person decides when it ships.</span></li>
-      <li><span data-ko>고치지 못한 것은 <strong>근거와 함께 적어 둡니다.</strong> 숨기면 다음 사람이 같은 함정을 밟습니다.</span><span data-en>What is still wrong is <strong>written down with its reasoning</strong> — hidden, it becomes a trap for the next person.</span></li>
-    </ul>
-  </div>
 </div>
 
 

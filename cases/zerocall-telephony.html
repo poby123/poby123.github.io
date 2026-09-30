@@ -49,17 +49,6 @@
     <p><span data-ko>제로콜은 070 번호로 전화와 문자를 주고받고, AI가 대신 응대하는 서비스입니다. 2025년 11월에 시작했으며, <strong>Asterisk를 올리고 다이얼플랜을 쓰고 call-handler를 ARI로 붙이는 초기 구성부터 맡았습니다.</strong></span><span data-en>ZeroCall is a 070 phone and messaging service with an AI that answers. It began in November 2025. <strong>I owned it from the initial build — standing up Asterisk, writing the dialplan, attaching the call-handler over ARI.</strong></span></p>
     <p><span data-ko>오랫동안 <strong>Asterisk 한 대가 모든 통화를 받았습니다.</strong> 사용자가 수백 명일 때는 충분한 구조였지만, 지점이 여럿인 학원을 받기에는 이중화가 필요했습니다.</span><span data-en>For a long time <strong>one Asterisk answered every call.</strong> That was sound at a few hundred users, but taking on a multi-branch academy called for redundancy.</span></p>
   </div>
-  <div class="summary">
-    <h2><span data-ko>요약</span><span data-en>In short</span></h2>
-    <ul>
-      <li><span data-ko>단일 Asterisk가 급소였습니다. 앞에 <strong>Kamailio + rtpengine</strong>을 세우고 뒤를 여러 대로 늘렸습니다.</span><span data-en>A single Asterisk was the weak point. I put <strong>Kamailio + rtpengine</strong> in front and several nodes behind.</span></li>
-      <li><span data-ko>Kamailio가 Asterisk의 포트를 그대로 이어받아, <strong>바깥에서 보이는 주소가 하나도 바뀌지 않았습니다.</strong></span><span data-en>Kamailio inherited Asterisk’s ports, so <strong>nothing visible from outside changed.</strong></span></li>
-      <li><span data-ko>통화를 노드에 고정하는 대신 <strong>소유권 모델</strong>로 풀었습니다. 넣었던 고정은 하루 만에 제거했습니다.</span><span data-en>Instead of pinning calls to nodes I used an <strong>ownership model</strong> — the pinning I had added lasted one day.</span></li>
-      <li><span data-ko>배포도 같은 원칙입니다. <strong>노드를 분배에서 빼고, 깨질 통화만 기다렸다가</strong> 교체합니다.</span><span data-en>Deploys follow the same rule: <strong>drain the node, wait only for the calls that would actually break,</strong> then swap.</span></li>
-      <li><span data-ko>현장에 이미 깔린 교환기 위에 서기 위해 <strong>VPN으로 붙고</strong>, SBC 역할은 이미 있는 것이 맡습니다.</span><span data-en>To sit on top of an exchange already in place, it <strong>connects over a VPN</strong> and reuses what we already run as the SBC.</span></li>
-    </ul>
-  </div>
-
 <figure class="trace">
       <svg viewBox="0 0 920 306" role="img" aria-labelledby="trace-title">
         <title id="trace-title">인입 전화 한 통이 지나는 경로 — the path a single inbound call travels</title>

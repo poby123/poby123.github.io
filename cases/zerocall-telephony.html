@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>주소를 바꾸지 않고 전화 인프라를 이중화하기 — 이원주</title>
-<meta name="description" content="단일 Asterisk를 Kamailio + rtpengine 앞단과 Asterisk 여러 대로 전환한 과정. 포트 승계, 통화 소유권 모델, 해시 선택, 현장 교환기 연동.">
+<meta name="description" content="단일 Asterisk를 Kamailio + rtpengine 앞단과 Asterisk 여러 대로 전환한 과정. 포트 승계, 통화 소유권 모델, 분배 동시성, 무중단 배포, 현장 교환기 연동.">
 <meta property="og:title" content="주소를 바꾸지 않고 전화 인프라를 이중화하기 — 이원주">
-<meta property="og:description" content="단일 Asterisk를 Kamailio + rtpengine 앞단과 Asterisk 여러 대로 전환한 과정. 포트 승계, 통화 소유권 모델, 해시 선택, 현장 교환기 연동.">
+<meta property="og:description" content="단일 Asterisk를 Kamailio + rtpengine 앞단과 Asterisk 여러 대로 전환한 과정. 포트 승계, 통화 소유권 모델, 분배 동시성, 무중단 배포, 현장 교환기 연동.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
@@ -55,6 +55,7 @@
       <li><span data-ko>단일 Asterisk가 급소였습니다. 앞에 <strong>Kamailio + rtpengine</strong>을 세우고 뒤를 여러 대로 늘렸습니다.</span><span data-en>A single Asterisk was the weak point. I put <strong>Kamailio + rtpengine</strong> in front and several nodes behind.</span></li>
       <li><span data-ko>Kamailio가 Asterisk의 포트를 그대로 이어받아, <strong>바깥에서 보이는 주소가 하나도 바뀌지 않았습니다.</strong></span><span data-en>Kamailio inherited Asterisk’s ports, so <strong>nothing visible from outside changed.</strong></span></li>
       <li><span data-ko>통화를 노드에 고정하는 대신 <strong>소유권 모델</strong>로 풀었습니다. 넣었던 고정은 하루 만에 제거했습니다.</span><span data-en>Instead of pinning calls to nodes I used an <strong>ownership model</strong> — the pinning I had added lasted one day.</span></li>
+      <li><span data-ko>배포도 같은 원칙입니다. <strong>노드를 분배에서 빼고, 깨질 통화만 기다렸다가</strong> 교체합니다.</span><span data-en>Deploys follow the same rule: <strong>drain the node, wait only for the calls that would actually break,</strong> then swap.</span></li>
       <li><span data-ko>현장에 이미 깔린 교환기 위에 서기 위해 <strong>VPN으로 붙고</strong>, SBC 역할은 이미 있는 것이 맡습니다.</span><span data-en>To sit on top of an exchange already in place, it <strong>connects over a VPN</strong> and reuses what we already run as the SBC.</span></li>
     </ul>
   </div>
@@ -128,6 +129,8 @@
     <li><a href="#problem"><span data-ko>무엇이 문제였나</span><span data-en>The problem</span></a></li>
     <li><a href="#ports"><span data-ko>주소를 바꾸지 않고 옮기기</span><span data-en>Moving without changing an address</span></a></li>
     <li><a href="#ownership"><span data-ko>구조와 통화 소유권</span><span data-en>Architecture and call ownership</span></a></li>
+    <li><a href="#concurrency"><span data-ko>두 대가 한 대기열을 나눠 쓸 때</span><span data-en>When two nodes share one queue</span></a></li>
+    <li><a href="#deploy"><span data-ko>통화를 끊지 않고 배포하기</span><span data-en>Deploying without dropping a call</span></a></li>
     <li><a href="#avaya"><span data-ko>현장 교환기 위에 서기</span><span data-en>Standing on an existing PBX</span></a></li>
   </ol>
 </nav>
@@ -239,6 +242,50 @@
   </table>
 </section>
 
+<section class="block" id="concurrency">
+  <h2><span data-ko>두 대가 한 대기열을 나눠 쓸 때</span><span data-en>When two nodes share one queue</span></h2>
+  <p><span data-ko>소유권은 "남의 통화를 만지지 않는다"까지만 보장합니다. 분배기가 둘이 되면 반대쪽에서 문제가 하나 더 생깁니다 — <strong>두 분배기가 같은 상담원을 동시에 고르면, 한 사람의 전화가 두 번 울립니다.</strong></span><span data-en>Ownership only guarantees that nobody touches someone else’s call. With two distributors, a second problem appears from the other side: <strong>if both pick the same agent at the same moment, one person’s phone rings twice.</strong></span></p>
+  <p><span data-ko>막는 장치는 원래 다 있었습니다 — 프로세스 메모리에요. 한 대일 때는 그걸로 충분했지만, 두 대가 되면 락도 예약도 상대 노드에게는 보이지 않습니다. Redis로 옮기는 것 자체는 일이 아니었습니다. <strong>옮기면서 의미가 바뀌지 않게 하는 것</strong>이 일이었습니다.</span><span data-en>The guards already existed — in process memory. Fine with one node; with two, neither the lock nor the reservation is visible to the other side. Moving them into Redis was not the work. <strong>Keeping their meaning intact through the move</strong> was.</span></p>
+
+  <h3><span data-ko>분 단위로 도는 루프에 거는 락</span><span data-en>Locking a loop that runs for minutes</span></h3>
+  <p><span data-ko>분배 루프는 링 타임아웃을 기다리며 분 단위로 돕니다. TTL 하나로는 안 됩니다 — 짧으면 일하는 도중에 풀리고, 길면 죽은 주인을 그만큼 기다립니다. 그래서 <strong>루프를 돌 때마다 연장하고, 연장에 실패하면 — 락을 잃었다는 뜻이므로 — 그 자리에서 멈춥니다.</strong> 해제는 compare-and-delete입니다. 그냥 지우면, TTL이 지나 다른 노드가 새로 잡은 락을 뒤늦게 끝난 쪽이 지워 버립니다.</span><span data-en>The distribution loop runs for minutes at a time, waiting out ring timeouts. One TTL cannot cover that — too short and the lock expires mid-work, too long and everyone waits on a dead owner. So <strong>the lock is renewed on every pass, and a failed renewal — which means the lock is lost — stops the loop where it stands.</strong> Release is compare-and-delete: a plain delete lets the slow finisher erase a lock some other node has since acquired.</span></p>
+
+  <h3><span data-ko>그룹으로는 못 막는 것</span><span data-en>What no group boundary can fence</span></h3>
+  <p><span data-ko>락의 축은 그룹인데, 상담원은 사람입니다. 운영에는 <strong>여러 그룹을 겸하는 상담원이 51명</strong> 있고(많게는 48개 그룹), 이들은 서로 다른 노드에서 동시에 후보가 됩니다. 통화중 표시는 링이 걸린 뒤에야 찍히므로 "골랐지만 아직 안 울린" 1~2초의 창이 남습니다. 그 창을 덮는 것이 배정 예약입니다.</span><span data-en>The lock’s axis is the group; an agent is a person. <strong>Fifty-one agents in production belong to several groups at once</strong> (up to 48), so they come up as candidates on different nodes simultaneously. The busy flag is only written once the ring is placed, which leaves a one-to-two-second window between choosing an agent and ringing them. Covering that window is the reservation’s whole job.</span></p>
+  <p><span data-ko>이 예약을 Redis로 옮기며 한 번 틀렸습니다. 조건 없는 SET을 썼는데, 그것은 선점이 아니라 표시일 뿐입니다. 인메모리 Set 시절에는 add가 동기라 틈이 없었지만, 네트워크를 건너는 순간 판정과 기록 사이가 벌어집니다. <strong>SET NX로 바꿔 이긴 쪽만 진행하고,</strong> 진 쪽은 다음 후보로 넘어갑니다.</span><span data-en>Moving it to Redis, I got this wrong once. I used an unconditional SET — which is a note, not a claim. When this was an in-memory Set, add was synchronous and there was no gap; the moment a network sits in between, the check and the write come apart. <strong>It is now SET NX: the winner proceeds,</strong> the loser moves on to the next candidate.</span></p>
+  <blockquote><p><span data-ko>테스트 목(mock)도 NX 의미를 지키게 고쳤습니다. 목이 항상 성공을 돌려주면 "두 노드가 같은 사람을 고르지 않는다"는 <strong>실패할 수 없는 검증</strong>이 되어 버립니다.</span><span data-en>The test mocks were fixed to honour NX semantics too. A mock that always succeeds turns “two nodes never pick the same person” into <strong>a test that cannot fail.</strong></span></p></blockquote>
+
+  <h3><span data-ko>주인 없는 통화들</span><span data-en>The calls that had no owner</span></h3>
+  <p><span data-ko>정작 소유권을 적는 곳은 분배기 하나뿐이었습니다. 큐를 쓰지 않는 그룹이 365개 중 349개, AI 응대, 착신전환 — <strong>대부분의 통화가 주인 없이 다니고 있었고,</strong> 노드가 둘이면 그 통화의 전환·당겨받기는 절반 확률로 실패합니다. 경로 세 곳에 기록을 심는 대신, 그 Asterisk의 모든 채널을 이미 보고 있는 한 곳에서 적게 했습니다. <strong>빠뜨릴 자리가 없는 위치</strong>가 정답이었습니다.</span><span data-en>Yet ownership was being written in exactly one place — the distributor. 349 of 365 groups never touch the queue; AI calls and forwarded calls skip it too. <strong>Most calls were travelling with no owner,</strong> and with two nodes their transfer and pickup fail half the time. Rather than planting a write into each of three paths, the record now happens in the one service that already watches every channel on that Asterisk — <strong>the place with nowhere left to forget.</strong></span></p>
+  <p><span data-ko>재시작 복구도 같은 기준으로 좁혔습니다. 전역 복구는 한 대일 때는 "아무도 못 돌보는 통화"와 같은 말이지만, 두 대가 되면 <strong>한쪽의 재배포가 다른 쪽의 멀쩡한 통화를 실패로 마감하고 대기자를 지웁니다.</strong> 이제 각 노드는 자기가 쥐고 있던 것만 정리합니다.</span><span data-en>Restart recovery narrowed along the same line. With one node, global recovery means “the calls nobody can look after”; with two, <strong>redeploying one node closes the other node’s healthy calls as failed and wipes its waiting callers.</strong> Each node now cleans up only what it held.</span></p>
+  <p><span data-ko>검증은 dev에 두 노드를 세우고 했습니다. 267통을 부어 최대 동시 37통, 상담원 두 명이 정확히 68통씩 — <strong>중복 배정 0, 유실 0.</strong></span><span data-en>Verified on dev with both nodes up: 267 calls poured in, 37 concurrent at peak, the two test agents taking exactly 68 apiece — <strong>zero double assignments, zero calls lost.</strong></span></p>
+</section>
+
+<section class="block" id="deploy">
+  <h2><span data-ko>통화를 끊지 않고 배포하기</span><span data-en>Deploying without dropping a call</span></h2>
+  <p><span data-ko>노드가 하나일 때 배포는 컨테이너 교체, 즉 작은 사고였습니다. 그 노드가 쥔 통화는 끊기고, 교체 창에 들어온 전화는 대기열 없는 폴백으로 떨어집니다 — 전원이 통화 중이면 원래 기다렸을 손님이 그냥 실패합니다. <strong>큐가 가장 필요한 바쁜 시간일수록 더 그랬습니다.</strong> 노드가 둘이 되고서야 제대로 할 수 있게 됐습니다. 노드마다 순차로:</span><span data-en>With one node, a deploy was a container swap — which is to say, a small incident. Calls held by that node died, and calls arriving in the window fell through to a fallback with no queue: with every agent busy, a caller who would have waited simply failed. <strong>The busier the hour, the worse it got.</strong> Only with a second node could it be done properly. One node at a time:</span></p>
+  <ul class="bullets">
+    <li><span data-ko><strong>받아 줄 노드가 있는지 먼저 봅니다.</strong> 다른 노드가 이미 죽었는데 나까지 빠지면 전화가 갈 곳이 없습니다 — 그때는 배포를 중단하는 것이 맞습니다.</span><span data-en><strong>Check that another node can take the traffic.</strong> If the other one is already down, pulling this one leaves calls nowhere to go — the right move is to abort the deploy.</span></li>
+    <li><span data-ko><strong>Kamailio 분배에서 뺍니다.</strong> 새 전화는 다른 노드가 대기열까지 그대로 받습니다.</span><span data-en><strong>Pull the node from Kamailio’s dispatcher.</strong> New calls land on the other node with the queue fully intact.</span></li>
+    <li><span data-ko><strong>깨질 통화가 빠지기를 기다립니다.</strong></span><span data-en><strong>Wait for the calls that would actually break.</strong></span></li>
+    <li><span data-ko><strong>교체하고, ARI가 붙은 것을 확인한 뒤에</strong> 분배로 되돌립니다.</span><span data-en><strong>Replace the container, confirm ARI is attached,</strong> then put the node back.</span></li>
+  </ul>
+
+  <h3><span data-ko>기다릴 것은 "통화 0"이 아니다</span><span data-en>The wait is not for zero calls</span></h3>
+  <p><span data-ko>무엇이 실제로 깨지는지부터 갈랐습니다. 상담원과 연결된 통화는 오디오가 Asterisk 브릿지 안에 있어 교체를 모르고 지나갑니다. 대기 중인 손님은 다음 인스턴스가 이어받습니다. 그 자리에서 깨지는 것은 <strong>미디어가 call-handler를 지나는 ARS·AI 통화뿐이고, 기다릴 것도 그것뿐입니다.</strong> "전체 통화 0"을 기다리면 바쁜 시간대에는 그 순간이 영영 오지 않습니다.</span><span data-en>The first question was what actually breaks. A call bridged to an agent rides through the swap — its audio lives inside Asterisk. A waiting caller is adopted by the next instance. What breaks in place is <strong>only the IVR and AI calls, whose media runs through call-handler itself — so that is all the wait covers.</strong> Wait for “zero calls overall” and, in busy hours, that moment never comes.</span></p>
+
+  <h3><span data-ko>교체를 건너는 통화</span><span data-en>Calls that ride through the swap</span></h3>
+  <p><span data-ko>그래도 컨테이너가 내려갔다 오는 순간은 있습니다. 재기동한 분배기가 이전 프로세스의 통화를 이어받는데, <strong>순서가 전부입니다.</strong></span><span data-en>There is still the moment when the container is down. The restarted distributor adopts what the previous process held — and <strong>the order is everything.</strong></span></p>
+  <ul class="bullets">
+    <li><span data-ko><strong>통화 중인 짝부터.</strong> 브릿지가 발신자–상담원 짝을 알려주므로 가장 확정적입니다. 이어받지 않으면 오디오는 멀쩡한데 장부에는 실패로 남고, 그 상담원의 호전환이 조용히 죽습니다.</span><span data-en><strong>Bridged calls first.</strong> The bridge names the caller–agent pair, which makes this the most certain step. Unadopted, the audio stays fine but the books close it as failed — and that agent’s transfer button dies silently.</span></li>
+    <li><span data-ko><strong>그다음 남은 링 채널을 고아로 정리.</strong> 안 끊으면 그 상담원이 통화중으로 묶여 서비스에서 통째로 빠집니다.</span><span data-en><strong>Then the orphaned ring channels.</strong> Left alone, they mark an agent as busy and take them out of service entirely.</span></li>
+    <li><span data-ko><strong>마지막으로 줄 서 있던 손님을</strong> 들어온 순서대로.</span><span data-en><strong>Last, the waiting callers,</strong> in the order they arrived.</span></li>
+  </ul>
+  <p><span data-ko>앞의 둘을 뒤집으면 안 됩니다 — 통화 중인 상담원의 채널도 이름이 같아서, 조건 없이 정리하면 <strong>대화 중인 손님이 끊깁니다.</strong> 실제로 직전 커밋에 그 순서 버그가 있었고, 다음 커밋에서 잡았습니다.</span><span data-en>The first two must not be swapped: an agent mid-conversation has a channel with the same name, and an unconditional cleanup <strong>hangs up on a live caller.</strong> The commit before this one had exactly that bug; the next one caught it.</span></p>
+  <blockquote><p><span data-ko>노드를 빼는 방법에도 함정이 있었습니다. inactive로 빼면 헬스체크 프로빙이 "노드가 멀쩡하네" 하고 <strong>2초 만에 되돌립니다.</strong> 관리자 결정을 뜻하는 disabled여야 프로빙이 못 뒤집습니다. 배포 러너에게는 노드마다 forced command로 묶은 전용 SSH 키를 줬습니다 — 그 키로 할 수 있는 일은 <strong>빼기·되돌리기·상태 조회 셋뿐이고,</strong> 넘어온 명령은 셸에 닿기 전에 형태 검사를 통과해야 합니다.</span><span data-en>Even pulling the node had a trap. Marked inactive, the health-check probing decides the node looks fine and <strong>puts it back within two seconds</strong> — it has to be disabled, an administrative state probing cannot override. And the deploy runner gets a deliberately narrow key: a per-node SSH key bound to a forced command that can do <strong>exactly three things — pull, restore, status</strong> — with every incoming command shape-checked before it reaches a shell.</span></p></blockquote>
+  <p><span data-ko>dev에서 대기·중단·회피 경로를 시뮬레이션으로 확인한 뒤, 운영에서 두 노드를 순차 배포해 검증했습니다. 다만 처음 만든 대기 로직은 에러 한 줄 없이 세 가지 방식으로 고장 나 있었습니다 — 그 감사는 <a href="/cases/silent-failures.html">에러를 내지 않는 실패</a>에 따로 적었습니다.</span><span data-en>The waiting, aborting and avoiding paths were exercised in a dev simulation first, then the procedure was verified in production, one node after the other. The wait logic I first wrote, though, turned out to be broken in three ways without raising a single error — that audit is written up in <a href="/cases/silent-failures.html">The failures that never raise an error</a>.</span></p>
+</section>
+
 <section class="block" id="avaya">
   <h2><span data-ko>현장 교환기 위에 서기</span><span data-en>Standing on an existing PBX</span></h2>
   <p><span data-ko>메가스터디 지점에는 이미 교환기와 전화기가 깔려 있었습니다. 요구는 명확했습니다 — <strong>전화기를 한 대도 바꾸지 않는다.</strong></span><span data-en>Megastudy’s branches already had an exchange and handsets in place. The requirement was blunt: <strong>replace no phones.</strong></span></p>
@@ -254,6 +301,7 @@
       <li><span data-ko>Kamailio 2대 액티브·스탠바이. 장애 시 공인 IP가 유지되어 통신사와 클라이언트 설정은 그대로입니다.</span><span data-en>Two Kamailio nodes, active/standby. The public IP survives failover, so nothing is reconfigured.</span></li>
       <li><span data-ko>Asterisk 3대 부하 분산. 15초 주기로 상태를 확인해 장애 노드를 자동으로 뺍니다.</span><span data-en>Three Asterisk nodes, health-checked every 15 seconds and dropped automatically on failure.</span></li>
       <li><span data-ko>노드를 늘리는 일이 <strong>목록에 한 줄 더하고 리로드</strong>가 됐습니다.</span><span data-en>Adding a node became <strong>one line in a list and a reload.</strong></span></li>
+      <li><span data-ko>배포는 노드를 하나씩 분배에서 빼서 진행합니다 — <strong>통화를 끊지 않습니다.</strong></span><span data-en>Deploys go one node at a time, drained from the dispatcher — <strong>no call is dropped.</strong></span></li>
       <li><span data-ko>전환 당일 통신사 협의도, 현장 전화기 재설정도 없었습니다.</span><span data-en>On cutover day there was no call to the carrier and no visit to a handset.</span></li>
     </ul>
   </div>

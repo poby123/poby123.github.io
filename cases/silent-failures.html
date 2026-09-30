@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" data-lang="ko" data-title-en="The failures that never raise an error — Wonju Lee">
+<html lang="ko" data-lang="ko" data-title-en="A verification system for failures that raise no error — Wonju Lee">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>에러를 내지 않는 실패 — 이원주</title>
+<title>검증 체계 — 에러 없이 틀리는 실패 잡기 — 이원주</title>
 <meta name="description" content="되돌리기가 답이 아닌 시스템을 확인하는 방법. 단위 시험이 닿지 못하는 구간, 이벤트 루프 지연 기준의 부하 시험, 조용히 실패하던 배포 안전장치.">
-<meta property="og:title" content="에러를 내지 않는 실패 — 이원주">
+<meta property="og:title" content="검증 체계 — 에러 없이 틀리는 실패 잡기 — 이원주">
 <meta property="og:description" content="단위 시험이 닿지 못하는 구간, 이벤트 루프 지연 기준의 부하 시험, 조용히 실패하던 배포 안전장치 셋.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,8 +35,8 @@
 
 <div class="case-hero">
   <p class="kicker"><a href="/">←</a> &nbsp;<span data-ko>케이스 스터디 · 검증과 배포</span><span data-en>Case study · Testing and deployment</span></p>
-  <h1><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></h1>
-  <p class="lead"><span data-ko>배포는 성공으로 끝났고, 시험은 통과로 읽혔고, 조회는 0을 돌려줬습니다. <strong>셋 다 틀렸는데 아무것도 에러를 내지 않았습니다.</strong></span><span data-en>The deploy exited successfully, the test read as a pass, the query returned zero. <strong>All three were wrong, and none of them raised an error.</strong></span></p>
+  <h1><span data-ko>검증 체계 — 에러 없이 틀리는 실패 잡기</span><span data-en>A verification system for failures that raise no error</span></h1>
+  <p class="lead"><span data-ko>배포는 성공으로 끝났고, 시험은 통과로 읽혔고, 조회는 0을 돌려줬습니다. <strong>셋 다 틀렸지만 에러는 한 줄도 없었습니다.</strong> 이런 실패를 잡기 위해 만든 시험 층과 배포 안전장치 점검 기록입니다.</span><span data-en>The deploy exited successfully, the test read as a pass, the query returned zero. <strong>All three were wrong, without a single error raised.</strong> This is a record of the test layers and the release-guard audit built to catch such failures.</span></p>
   <dl class="specsheet">
     <div><dt><span data-ko>기간</span><span data-en>Period</span></dt><dd>2026.08 – <span data-ko>현재</span><span data-en>present</span></dd></div>
     <div><dt><span data-ko>역할</span><span data-en>Role</span></dt><dd><span data-ko>시험 설계 · 배포 절차 · 원인 분석</span><span data-en>Test design, release process, root-cause analysis</span></dd></div>
@@ -44,6 +44,16 @@
     <div><dt><span data-ko>대상</span><span data-en>Subject</span></dt><dd><span data-ko>제로콜 전화 시스템</span><span data-en>The ZeroCall telephony stack</span></dd></div>
   </dl>
 
+  <div class="context">
+    <h2><span data-ko>성과</span><span data-en>Results</span></h2>
+    <div class="outcome">
+      <ul>
+        <li><span data-ko>단위 시험 밖 구간(다이얼플랜 SQL·부하·AI 응대)에 <strong>시험 층 3종 구축</strong></span><span data-en><strong>Three test layers built</strong> for what unit tests cannot reach — dialplan SQL, load, the voice agent</span></li>
+        <li><span data-ko>부하 판정 기준을 <strong>이벤트 루프 지연 p99 20ms</strong>로 정의해 인스턴스당 정원 산출</span><span data-en>Load capacity judged by <strong>event-loop lag at p99 20 ms,</strong> yielding a per-instance headcount</span></li>
+        <li><span data-ko>배포 안전장치의 <strong>조용한 결함 3건 발견·수정</strong> — 교환기 스텁으로 5개 실패 경로 전부 재현 검증</span><span data-en><strong>Three silent faults in the release guard found and fixed,</strong> all five failure paths reproduced against a PBX stub</span></li>
+      </ul>
+    </div>
+  </div>
   <div class="context">
     <h2><span data-ko>배경</span><span data-en>Background</span></h2>
     <p><span data-ko>제로콜의 전화는 학원의 대표번호로 걸려 옵니다. 배포가 잘못되면 그 번호가 안 받아지고, <strong>되돌리는 동안에도 고객 전화는 계속 걸려 옵니다.</strong></span><span data-en>ZeroCall carries an academy’s main line. A bad release means that number stops answering — and <strong>customers keep calling while you roll back.</strong></span></p>
@@ -78,7 +88,7 @@
 </section>
 
 <section class="block" id="forensics">
-  <h2><span data-ko>배포 안전장치가 작동하지 않고 있었다</span><span data-en>The release guard was not actually guarding</span></h2>
+  <h2><span data-ko>점검 — 배포 안전장치의 조용한 결함 3건</span><span data-en>The audit — three silent faults in the release guard</span></h2>
   <p><span data-ko>통화를 처리하는 프로세스를 교체할 때는 통화가 빠질 때까지 기다리도록 되어 있습니다. 그 대기 로직을 점검하다가 결함 세 가지를 발견했습니다. <strong>셋 다 에러 없이 통과하고 있어, 로그만 보아서는 드러나지 않았습니다.</strong></span><span data-en>Replacing the process that handles calls is supposed to wait for them to drain. Auditing that logic, I found three faults. <strong>All three passed without raising anything, so the logs never showed them.</strong></span></p>
 
   <h3><span data-ko>① 주석은 "중단한다"였고 코드는 그대로 통과했다</span><span data-en>① The comment said "abort"; the code walked on</span></h3>
@@ -95,17 +105,17 @@
 </section>
 
 <section class="block" id="lesson">
-  <h2><span data-ko>조용한 실패에 대하여</span><span data-en>On silent failure</span></h2>
+  <h2><span data-ko>교훈 — 조용한 실패를 다루는 원칙</span><span data-en>Lessons — principles for silent failure</span></h2>
   <p><span data-ko>여기 모인 결함에는 공통점이 있습니다. <strong>하나도 에러를 내지 않았습니다.</strong> 배포는 성공으로 끝났고, 시험은 통과로 읽혔고, 조회는 0을 돌려줬습니다.</span><span data-en>Every fault here has one thing in common: <strong>none of them raised an error.</strong> The deploy exited successfully, the test read as a pass, the query returned zero.</span></p>
   <p><span data-ko>그래서 시험 문서에 <strong>"함정" 목록</strong>을 따로 둡니다. 두 API가 같은 토큰 클레임을 반대로 해석해 모든 요청이 거부됐는데 <strong>"거부됐으니 통과"로 읽은 일</strong>, 순차 분배가 자리마다 15초를 소요한다는 점을 모르고 20초에 보고 판정한 일 — 전부 실제로 당한 것들입니다.</span><span data-en>So the test docs carry a <strong>list of traps</strong>: two APIs reading the same token claim in opposite directions so everything was rejected and I <strong>read "rejected, therefore passed"</strong>; judging at twenty seconds when sequential distribution spends fifteen per seat. All of them caught me first.</span></p>
   <blockquote><p><span data-ko><strong>시험이 틀리는 방식은 대개 실패를 성공으로 읽는 쪽입니다.</strong> 그래서 "무엇을 확인했는가"보다 <strong>"어떤 상태를 만들어서 확인했는가"</strong>를 적어 둡니다. 조건이 다르면 같은 이름의 시험이 다른 것을 봅니다.</span><span data-en><strong>Tests usually fail by reading a failure as a pass.</strong> So the docs record <strong>what state was constructed</strong> rather than what was checked — under different conditions, a test with the same name looks at something else entirely.</span></p></blockquote>
 </section>
 
 <div class="casenav">
-  <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
-  <a href="/cases/infra.html"><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></a>
-  <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
-  <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+  <a href="/cases/gonggan-hero.html"><span data-ko>7개 플랫폼 예약을 3분 안에 동기화하기</span><span data-en>Syncing seven booking platforms inside three minutes</span></a>
+  <a href="/cases/infra.html"><span data-ko>51개 애플리케이션의 k3s 전환</span><span data-en>Moving 51 applications to k3s</span></a>
+  <a href="/cases/zerocall-telephony.html"><span data-ko>전화 인프라 무중단 이중화</span><span data-en>Zero-downtime redundancy for the telephony stack</span></a>
+  <a href="/cases/zerocall-ai.html"><span data-ko>실시간 AI 전화 응대와 3종 단말 수신 체계</span><span data-en>Realtime AI call answering across three device types</span></a>
 </div>
 
 </div>

@@ -145,7 +145,7 @@
           <li><span data-ko><strong>배포가 통화를 끊지 않습니다.</strong> 노드를 분배에서 빼고, 실제로 깨질 통화만 기다렸다가 교체합니다. 재기동한 분배기는 통화 중인 짝과 줄 서 있던 손님을 순서대로 이어받습니다.</span><span data-en><strong>Deploys do not drop calls.</strong> A node is drained from the dispatcher and replaced only once the calls that would actually break have ended; the restarted distributor adopts live calls and waiting callers in order.</span></li>
           <li><span data-ko><strong>대기열과 ARS를 직접 구현</strong>했습니다. Asterisk 내장 큐는 단말이 항상 등록돼 있다고 전제하는데, 모바일은 푸시로 깨워야 해서 맞지 않았습니다. 분배기를 Node에서 ARI로 구현했습니다.</span><span data-en><strong>Wrote the queue and IVR myself.</strong> Asterisk's built-in queue assumes endpoints stay registered; mobile endpoints have to be woken by push. So the distributor runs in Node over ARI instead.</span></li>
           <li><span data-ko><strong>AI 응대 하네스를 만들었습니다.</strong> 업종별 에이전트와 도구를 갈아 끼우고, 실시간 음성 모델을 통화 미디어에 직접 물립니다. 필요하면 대화 도중 사람에게 넘깁니다.</span><span data-en><strong>Built the AI answering harness</strong> — per-industry agents and tools that swap in behind one interface, wired straight into the call's media, and able to hand the caller to a human mid-conversation.</span></li>
-          <li><span data-ko><strong>시험 층을 따로 만들었습니다.</strong> 단위 시험이 닿지 못하는 다이얼플랜 로직은 원본에서 쿼리를 꺼내 실제 DB에 돌려 확인하고, 처리 용량은 CPU가 아니라 이벤트 루프 지연으로 판정하는 부하 시험으로 잽니다.</span><span data-en><strong>Built the test layers.</strong> Dialplan logic unit tests cannot reach is verified by lifting its query from the source file and running it against the real database; capacity is measured by event-loop lag under load rather than CPU.</span></li>
+          <li><span data-ko><strong>시험 층을 따로 만들었습니다.</strong> 단위 시험이 닿지 못하는 다이얼플랜 로직은 원본에서 쿼리를 꺼내 실제 DB에 돌려 확인하고, 처리 용량은 CPU가 아니라 이벤트 루프 지연으로 판정하는 부하 시험으로 잽니다.</span><span data-en><strong>Built the test layers.</strong> Dialplan logic that unit tests cannot reach is verified by lifting its query from the source file and running it against the real database; capacity is measured by event-loop lag under load rather than CPU.</span></li>
         </ul>
         <p class="small muted" style="margin-bottom:1rem">
           <span data-ko><strong>통신 표준과 통신사 규격 문서를 근거로</strong> 설계했습니다. 서버 모노레포 8개 앱 약 24만 줄에, 관리 웹 3종·모바일 앱·PC 에이전트가 함께 붙어 있습니다. 전화 외에도 문자 송수신(통신사 통합메시징 연동과 전송자격인증 준비), 구독 결제 스케줄링, 고객사 웹사이트에 붙이는 상담 위젯(iframe + postMessage)을 함께 만들었습니다.</span>
@@ -346,11 +346,11 @@
       <p><span data-ko>무엇을 만들었는지보다, 왜 그렇게 결정했고 무엇을 감수했는지를 적었습니다.</span><span data-en>Less about what got built, more about why it was decided that way and what it cost.</span></p>
     </div>
     <div class="casenav" style="border-top:0;padding-top:0">
-      <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
-      <a href="/cases/infra.html"><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></a>
-      <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
-      <a href="/cases/silent-failures.html"><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></a>
-      <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+      <a href="/cases/gonggan-hero.html"><span data-ko>7개 플랫폼 예약을 3분 안에 동기화하기</span><span data-en>Syncing seven booking platforms inside three minutes</span></a>
+      <a href="/cases/infra.html"><span data-ko>51개 애플리케이션의 k3s 전환</span><span data-en>Moving 51 applications to k3s</span></a>
+      <a href="/cases/zerocall-telephony.html"><span data-ko>전화 인프라 무중단 이중화</span><span data-en>Zero-downtime redundancy for the telephony stack</span></a>
+      <a href="/cases/silent-failures.html"><span data-ko>검증 체계 — 에러 없이 틀리는 실패 잡기</span><span data-en>A verification system for failures that raise no error</span></a>
+      <a href="/cases/zerocall-ai.html"><span data-ko>실시간 AI 전화 응대와 3종 단말 수신 체계</span><span data-en>Realtime AI call answering across three device types</span></a>
     </div>
   </div>
 </section>

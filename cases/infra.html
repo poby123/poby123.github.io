@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" data-lang="ko" data-title-en="Why k3s instead of EKS — Wonju Lee">
+<html lang="ko" data-lang="ko" data-title-en="Moving 51 applications to k3s — Wonju Lee">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EKS 대신 k3s를 고른 이유 — 이원주</title>
+<title>51개 애플리케이션의 k3s 전환 — 이원주</title>
 <meta name="description" content="서비스가 늘면서 EC2에 흩어진 애플리케이션 51개를 k3s + Argo CD로 옮긴 과정. 배포를 수동으로 둔 이유, 라운드로빈 DNS 장애, 알려진 제약.">
-<meta property="og:title" content="EKS 대신 k3s를 고른 이유 — 이원주">
+<meta property="og:title" content="51개 애플리케이션의 k3s 전환 — 이원주">
 <meta property="og:description" content="서비스가 늘면서 EC2에 흩어진 애플리케이션 51개를 k3s + Argo CD로 옮긴 과정. 배포를 수동으로 둔 이유, 라운드로빈 DNS 장애, 알려진 제약.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,8 +35,8 @@
 
 <div class="case-hero">
   <p class="kicker"><a href="/">←</a> &nbsp;<span data-ko>케이스 스터디 · 플로버 플랫폼 인프라</span><span data-en>Case study · Flover platform infrastructure</span></p>
-  <h1><span data-ko>EKS 대신 k3s를 고른 이유</span><span data-en>Why k3s instead of EKS</span></h1>
-  <p class="lead"><span data-ko>서버비와 조직 규모를 재고 <strong>EKS 대신 k3s</strong>를 골랐습니다. 애플리케이션 51개를 GitOps로 옮겼습니다.</span><span data-en>Weighing cost against the size of the team, I chose <strong>k3s over EKS</strong> and moved 51 applications onto GitOps.</span></p>
+  <h1><span data-ko>51개 애플리케이션의 k3s 전환</span><span data-en>Moving 51 applications to k3s</span></h1>
+  <p class="lead"><span data-ko>EC2에 흩어져 있던 애플리케이션 51개를 직접 구축한 k3s 클러스터로 옮기고, <strong>배포 경로를 GitOps로 표준화</strong>했습니다. 비용과 조직 규모를 근거로 EKS 대신 k3s를 택했습니다.</span><span data-en>Fifty-one applications scattered across EC2 moved onto a k3s cluster I built, with <strong>every deploy path standardised on GitOps.</strong> The choice of k3s over EKS was made on cost and team size.</span></p>
   <dl class="specsheet">
     <div><dt><span data-ko>기간</span><span data-en>Period</span></dt><dd>2026.07 – <span data-ko>현재</span><span data-en>present</span></dd></div>
     <div><dt><span data-ko>역할</span><span data-en>Role</span></dt><dd><span data-ko>설계 · 구축 · 운영</span><span data-en>Design, build, operation</span></dd></div>
@@ -44,6 +44,17 @@
     <div><dt><span data-ko>규모</span><span data-en>Scale</span></dt><dd><span data-ko>노드 5대 · 애플리케이션 51개</span><span data-en>5 nodes · 51 applications</span></dd></div>
   </dl>
 
+  <div class="context">
+    <h2><span data-ko>성과</span><span data-en>Results</span></h2>
+    <div class="outcome">
+      <ul>
+        <li><span data-ko>EC2에 흩어져 있던 <strong>51개 앱을 단일 클러스터·단일 배포 경로로 통합</strong></span><span data-en><strong>51 apps unified onto one cluster and one deploy path</strong> from scattered EC2 instances</span></li>
+        <li><span data-ko>관리형 컨트롤 플레인 비용 제거 — <strong>트레이드오프를 근거와 함께 저장소에 문서화</strong></span><span data-en>Managed control-plane cost eliminated — <strong>the trade-off documented in the repository with its reasoning</strong></span></li>
+        <li><span data-ko>라운드로빈 DNS를 NLB L4 패스스루로 교체 — <strong>노드 장애 시 사용자 25%가 실패하던 구조 해소</strong></span><span data-en>Round-robin DNS replaced with an NLB at L4 — <strong>ending the setup where one failed node took out 25% of users</strong></span></li>
+        <li><span data-ko>신규 관리자가 <strong>계정 발급부터 클러스터 접근까지 재현할 수 있는 온보딩 문서</strong></span><span data-en>An onboarding document a new maintainer can <strong>follow from account creation to cluster access</strong></span></li>
+      </ul>
+    </div>
+  </div>
   <div class="context">
     <h2><span data-ko>배경</span><span data-en>Background</span></h2>
     <p><span data-ko>플로버에는 서비스가 하나였습니다. 공간히어로를 EC2에 올리고 스크립트로 배포하면 충분했습니다.</span><span data-en>Flover had one service. Putting Gonggan Hero on EC2 and deploying with scripts was enough.</span></p>
@@ -53,7 +64,7 @@
 
 
 <section class="block">
-  <h2><span data-ko>서비스가 하나일 때는 문제가 아니었다</span><span data-en>It was not a problem while there was one service</span></h2>
+  <h2><span data-ko>문제 — 서비스 증가와 흩어진 배포</span><span data-en>The problem — more services, scattered deploys</span></h2>
   <p><span data-ko>공간히어로만 있을 때는 EC2에 앱을 올리고 스크립트로 배포하면 충분했습니다. 그런데 제로콜이 붙고, 그 아래로 메시징·결제 서비스가 늘어나면서 상황이 달라졌습니다.</span><span data-en>With only Gonggan Hero, putting apps on EC2 and deploying with scripts was enough. Then ZeroCall arrived, and messaging and billing services under it.</span></p>
   <p><span data-ko>무엇이 어디에 떠 있는지 한 번에 볼 수 없고, 서비스마다 배포 방식이 다르고, <strong>매니페스트가 공간히어로 저장소 안에 제로콜 것까지 들어 있는</strong> 이상한 구조가 되었습니다.</span><span data-en>Nobody could see at a glance what was running where, each service deployed slightly differently, and <strong>ZeroCall’s manifests were living inside the Gonggan Hero repository.</strong></span></p>
 
@@ -122,7 +133,7 @@
 </section>
 
 <section class="block">
-  <h2><span data-ko>배포는 자동이 아니라 의도적으로 수동입니다</span><span data-en>Deployment is manual on purpose</span></h2>
+  <h2><span data-ko>배포 정책 — 의도된 수동 동기화</span><span data-en>Release policy — manual sync by design</span></h2>
   <p><span data-ko>CI는 이미지를 굽고 <strong>태그만 커밋</strong>합니다. Argo CD는 그 차이를 "동기화되지 않음"으로 표시한 채 기다립니다. 사람이 누르면 반영됩니다. 이미지는 항상 최신이고, 배포 시점은 사람이 정한다는 뜻입니다.</span><span data-en>CI builds the image and <strong>commits only the tag</strong>. Argo CD marks the drift as out of sync and waits. A person presses sync. The image is always current; when it ships is a human decision.</span></p>
   <p><span data-ko>예외는 랜딩 페이지 세 개입니다. 정적 마케팅 페이지라 롤백이 싸고 배포가 잦아서 자동으로 두었습니다. 다만 Argo의 기본 폴링 주기가 3분이라 "즉시"가 아니라 최대 3분 지연이라는 점도 적어 두었습니다 — 이런 사항을 기록해 두지 않으면 나중에 누군가 "배포가 안 된다"고 30분을 씁니다.</span><span data-en>The exception is three landing pages: static marketing sites where rollback is cheap and releases are frequent, so they sync automatically. The note also says that Argo polls every three minutes, so "automatic" means up to three minutes late — without that line, someone eventually spends half an hour deciding the deploy is broken.</span></p>
   <ul class="bullets">
@@ -134,7 +145,7 @@
 </section>
 
 <section class="block">
-  <h2><span data-ko>모르는 채로 두지 않기</span><span data-en>Not leaving things unknown</span></h2>
+  <h2><span data-ko>운영 원칙 — 알려진 제약의 문서화</span><span data-en>Operating principle — documenting known limitations</span></h2>
   <p><span data-ko>이 클러스터에는 아직 고치지 못한 것들이 있습니다. 저장소에 <span class="mono">TODO.md</span>를 두고 <strong>무엇이 문제이고 왜 지금 그 상태인지</strong>를 근거와 함께 적어 둡니다. 숨기면 다음 사람이 같은 함정을 다시 밟습니다.</span><span data-en>This cluster still has unfixed problems. A <span class="mono">TODO.md</span> in the repository records <strong>what is wrong and why it is currently that way</strong>, with the reasoning. Hidden, they become traps the next person walks into.</span></p>
   <table>
     <thead><tr><th style="width:38%"><span data-ko>알려진 제약</span><span data-en>Known limitation</span></th><th><span data-ko>현재 판단</span><span data-en>Current position</span></th></tr></thead>
@@ -147,7 +158,7 @@
 </section>
 
 <section class="block">
-  <h2><span data-ko>지금</span><span data-en>Where it stands</span></h2>
+  <h2><span data-ko>운영 현황</span><span data-en>Current state</span></h2>
   <div class="outcome">
     <ul>
       <li><span data-ko>애플리케이션 51개가 하나의 클러스터에서 돌고, 배포 경로가 서비스마다 같습니다.</span><span data-en>51 applications on one cluster, every service deploying the same way.</span></li>
@@ -159,10 +170,10 @@
 
 
 <div class="casenav">
-  <a href="/cases/gonggan-hero.html"><span data-ko>3분 안에 중복 예약을 막기</span><span data-en>Stopping a double booking within three minutes</span></a>
-  <a href="/cases/zerocall-telephony.html"><span data-ko>주소를 바꾸지 않고 전화 인프라를 이중화하기</span><span data-en>Making the phone system redundant without changing an address</span></a>
-  <a href="/cases/silent-failures.html"><span data-ko>에러를 내지 않는 실패</span><span data-en>The failures that never raise an error</span></a>
-  <a href="/cases/zerocall-ai.html"><span data-ko>전화를 받는 AI, 그리고 그 전화가 울리는 곳</span><span data-en>An AI that answers, and the devices that ring</span></a>
+  <a href="/cases/gonggan-hero.html"><span data-ko>7개 플랫폼 예약을 3분 안에 동기화하기</span><span data-en>Syncing seven booking platforms inside three minutes</span></a>
+  <a href="/cases/zerocall-telephony.html"><span data-ko>전화 인프라 무중단 이중화</span><span data-en>Zero-downtime redundancy for the telephony stack</span></a>
+  <a href="/cases/silent-failures.html"><span data-ko>검증 체계 — 에러 없이 틀리는 실패 잡기</span><span data-en>A verification system for failures that raise no error</span></a>
+  <a href="/cases/zerocall-ai.html"><span data-ko>실시간 AI 전화 응대와 3종 단말 수신 체계</span><span data-en>Realtime AI call answering across three device types</span></a>
 </div>
 
 </div>
